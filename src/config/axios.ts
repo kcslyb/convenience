@@ -13,7 +13,6 @@ http.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     // 对请求方式为post，put的请求进行加密
     if (config.method === 'post' || config.method === 'put') {
-      console.info(config.data)
       config.data = EncryptHelper.aesEncrypt(JSON.stringify(config.data))
     }
     config.headers = { 'Content-Type': 'application/json;charset=utf-8' }
@@ -43,7 +42,6 @@ http.interceptors.response.use(
         msg = error.response.data
       }
     }
-    console.info(msg)
     Notify({ type: 'danger', message: msg })
     const flag = '/api/login'.indexOf(error.response.config.url) > -1
     if (error.response.status === 401 && !flag) {

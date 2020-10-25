@@ -56,7 +56,9 @@ export default {
         return
       }
       this.$store.dispatch('Login', this.userDto).then(res => {
-        console.info(res)
+        if (res) {
+          this.$router.push('/home')
+        }
       }).catch((e) => { console.info(e) })
     },
     forgotPassword () {
@@ -145,7 +147,8 @@ export default {
       background-color: transparent;
       background-image: none;
       border: none;
-      border-bottom: 1px solid #0B2F30;
+      border-radius: .2rem;
+      border-bottom: .1rem solid #A2BBBB;
       box-sizing: border-box;
       color: #0B2F30;
       display: inline-block;
@@ -155,6 +158,7 @@ export default {
       outline: none;
       padding: 0 1.5rem;
       transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+      box-shadow: inset 0 0 0 1000px #ffffff!important;
     }
   }
 
@@ -167,8 +171,9 @@ export default {
 
   .login-footer {
     width: 100%;
+    color: white;
     cursor: pointer;
     padding: 1.2rem 0;
-    background-color: #F2F2F2;
+    background-color: rgb(69 104 98);
   }
 </style>

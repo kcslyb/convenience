@@ -6,6 +6,7 @@ import './config/rem'
 import router from './router'
 import store from './store'
 import http from "@/config/axios"
+import './assets/style/common.less'
 
 Vue.config.productionTip = false
 

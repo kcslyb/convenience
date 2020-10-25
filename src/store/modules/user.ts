@@ -41,8 +41,8 @@ const user = {
             // 储存用户信息
             commit('SET_USER', res.data)
             setToken()
-            store.dispatch('GenerateRoutes', res.data).then(() => {
-            })
+            // store.dispatch('GenerateRoutes', res.data).then(() => {
+            // })
             resolve(res.data)
           }
         }).catch((error) => {
