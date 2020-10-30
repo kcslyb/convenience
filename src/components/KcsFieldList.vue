@@ -1,9 +1,23 @@
 <script>
 import moment from 'moment'
-import NcFile from '../../views/maintenance/maintenance-record/components/NcFile'
+import KcsFileUpload from './KcsFileUpload.vue'
+import { Form, Field, Cell, RadioGroup, Radio, CheckboxGroup, Checkbox, Icon, Popup, Picker, DatetimePicker } from 'vant'
 export default {
-  name: 'NcFieldList',
-  components: { NcFile },
+  name: 'KcsFieldList',
+  components: {
+    VanForm: Form,
+    VanCell: Cell,
+    VanIcon: Icon,
+    VanField: Field,
+    VanPopup: Popup,
+    VanRadio: Radio,
+    VanPicker: Picker,
+    VanCheckbox: Checkbox,
+    VanRadioGroup: RadioGroup,
+    VanCheckboxGroup: CheckboxGroup,
+    VanDatetimePicker: DatetimePicker,
+    KcsFileUpload
+  },
   props: {
     // field行参数数组 eg: [{name: 'prop', label: '参数名'}...]
     fieldProps: {
@@ -46,10 +60,12 @@ export default {
     generate (item) {
       if (item.type) {
         const reg = /\b(\w)|\s(\w)/g
-        const type = item.type.replace(reg, (m) => {
-          return m.toUpperCase()
-        })
-        return this[`generate${type}`](item)
+        const type = item.type.replace(reg, m => m.toUpperCase())
+        if (Object.prototype.hasOwnProperty.call(this, `generate${type}`)) {
+          return this[`generate${type}`](item)
+        } else {
+          throw new Error(`KcsFieldList: 不存在对应类型${type}的方法`)
+        }
       } else {
         return this.generateField(item)
       }
@@ -67,7 +83,7 @@ export default {
           required={item.required}
           error-message-align="right"
           label-class="label-class"
-          style="font-size: 1.4rem"
+          style="font-size: 0.8rem"
           rows={item.rows ? item.rows : 1}
           placeholder={item.readonlyFixed || item.readonly ? '' : `请输入${item.label}`}
           value={this.$attrs.value[item.name]}
@@ -85,7 +101,7 @@ export default {
         <van-cell
           value={this.$attrs.value[item.name]}
           title={item.label + ':'}
-          style="font-size: 1.4rem"
+          style="font-size: 0.8rem"
         />
       )
     },
@@ -207,7 +223,7 @@ export default {
             label-width={item.labelWidth ? item.labelWidth : 'auto'}
             class="field-textarea"
             label-class="label-class"
-            style="font-size: 1.4rem"
+            style="font-size: 0.8rem"
             rows={item.rows ? item.rows : 2}
             placeholder={item.readonly ? '' : `请输入${item.label}`}
             value={this.$attrs.value[item.name]}
@@ -235,7 +251,7 @@ export default {
           type={item.fieldType}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 1.4rem"
+          style="font-size: 0.8rem"
           placeholder={item.readonly ? '' : (item.placeholder ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
           validate-trigger="onChange"
@@ -269,7 +285,7 @@ export default {
           type={item.fieldType}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 1.4rem"
+          style="font-size: 0.8rem"
           placeholder={item.readonly ? '' : (item.placeholder ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
           validate-trigger="onChange"
@@ -334,7 +350,7 @@ export default {
             type={item.fieldType}
             label={item.label + ':'}
             label-class="label-class"
-            style="font-size: 1.4rem"
+            style="font-size: 0.8rem"
             placeholder={
               item.readonly
                 ? ''
@@ -388,7 +404,7 @@ export default {
           label-width={item.labelWidth ? item.labelWidth : 'auto'}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 1.4rem"
+          style="font-size: 0.8rem"
           placeholder={item.readonly ? '' : '点击选择'}
           value={this.$attrs.value[item.nameLabel]}
           input-align={item.inputAlign ? item.inputAlign : 'right'}
@@ -424,21 +440,22 @@ export default {
           label-width={item.labelWidth ? item.labelWidth : 'auto'}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 1.4rem"
+          style="font-size: 0.8rem"
           placeholder={item.readonly ? '' : '点击选择'}
           value={this.$attrs.value[item.nameLabel]}
           input-align={item.inputAlign ? item.inputAlign : 'right'}
         />
       )
     },
-    // 生成图片上传组件 type: img
-    generateImg (item) {
+    // 生成图片上传组件 type: file
+    generateFile (item) {
+      if (item.type !== 'file') return ''
       let temp = this.$attrs.value[item.name] || []
       if (!Array.isArray(temp)) {
         temp = temp.split(',')
       }
       return (
-        <nc-file
+        <kcs-file-upload
           file-ids={temp}
           show-info={item.readonly}
           onOn-file-change={(fileList) => {
@@ -460,6 +477,7 @@ export default {
             this.showActionSheet = false
           }}>
           <van-picker
+            style="font-size: 0.8rem"
             show-toolbar={true}
             value-key={option.label}
             columns={this.fieldItem.options}
@@ -485,6 +503,7 @@ export default {
             this.showDatetimePicker = false
           }}>
           <van-datetime-picker
+            style="font-size: 0.8rem"
             type={this.fieldItem.dateType ? this.fieldItem.dateType : 'datetime'}
             attrs={{ value: this.getDate }}
             min-date={this.fieldItem.minDate}
@@ -507,7 +526,7 @@ export default {
     return (
       <van-form
         show-error-message={this.showErrorMessage}
-        ref="ncFieldForm"
+        ref="KcsFieldForm"
         onFailed={(errorInfo) => {
           const temp = [].concat(errorInfo.errors)
           const errorMsg = []
@@ -538,7 +557,7 @@ export default {
 <style lang="less" scoped>
   .label-class {
     color: #6E7D93;
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
   .textarea-label {
     background-color: white;
@@ -565,15 +584,15 @@ export default {
     border-bottom: .03rem solid #ebedf0;
     .textarea-label {
       background-color: white;
-      padding-left: 0px;
+      padding-left: 0;
       padding-top: 10px;
     }
     .nc-radio {
-      font-size: 1.4rem;
+      font-size: 1rem;
       line-height: 2.4rem;
       .nc-radio-label {
         color: #6E7D93;
-        font-size: 1.4rem;
+        font-size: 1rem;
       }
     }
   }
@@ -581,7 +600,7 @@ export default {
     position: absolute;
     left: 8px;
     color: #ee0a24;
-    font-size: 14px;
+    font-size: 1rem;
     content: '*';
   }
   .multiple-select {
@@ -591,7 +610,7 @@ export default {
       position: relative;
       display: flex;
       background-color: #fff;
-      padding: 0.6rem 0rem;
+      padding: 0.6rem 0;
 
       .participant-item {
         padding: 0.4rem 2rem;
@@ -600,12 +619,12 @@ export default {
         background-color: #e1e9ff;
         color: #666666;
         position: relative;
-        font-size: 1.2rem;
+        font-size: 1rem;
 
         .participant-item-i {
           position: absolute;
-          right: -4px;
-          top: -4px;
+          right: .28rem;
+          top: .28rem;
           color: #5289ff;
         }
       }
