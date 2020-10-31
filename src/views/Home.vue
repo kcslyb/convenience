@@ -18,8 +18,8 @@
         />
       </div>
       <kcs-label title="基础数据"></kcs-label>
-      <van-cell class="active" url="/statistical/analysis" icon="records" title="类型转换关系" is-link />
-      <van-cell class="active" url="/entity/relevance" icon="desktop-o" title="实体关联关系" is-link />
+      <van-cell class="active" url="/statistical/analysis" icon="points" title="类型池" is-link />
+      <van-cell class="active" url="/entity/relevance" icon="desktop-o" title="类型转换关系" is-link />
       <kcs-label title="事件记录"></kcs-label>
       <van-cell class="active" url="#" icon="notes-o" title="事件记录统计" is-link />
     </div>
@@ -112,7 +112,7 @@ export default {
       text-align: left;
 
       .home-content-title {
-        height: 8rem;
+        height: 6rem;
         text-align: center;
         padding: 4rem 0;
         background-image: url("../assets/img/background-login.jpeg");

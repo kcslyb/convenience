@@ -68,6 +68,10 @@ export default {
           prop: 'resultUnitName',
           label: '类型名',
           width: 60
+        }, {
+          type: 'date',
+          prop: 'createTime',
+          label: '创建时间'
         }
       ]
     }

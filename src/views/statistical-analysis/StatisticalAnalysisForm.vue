@@ -47,7 +47,7 @@ export default {
           name: 'oneTypeUnit',
           nameLabel: 'oneTypeUnitName',
           label: '类型一',
-          propObj: {
+          optionProps: {
             value: 'key',
             label: 'label'
           },
@@ -65,7 +65,7 @@ export default {
           name: 'twoTypeUnit',
           nameLabel: 'twoTypeUnitName',
           label: '类型二',
-          propObj: {
+          optionProps: {
             value: 'key',
             label: 'label'
           },
@@ -88,10 +88,10 @@ export default {
       })
       if (idNotExit) {
         this.barCtrlList = ['add']
-        this.title = '类型转换关系新增'
+        this.title = '类型池新增'
       } else {
         this.barCtrlList = []
-        this.title = '类型转换关系详情'
+        this.title = '类型池详情'
         this.fieldProps.map(value => {
           value.readonly = true
         })
@@ -125,7 +125,10 @@ export default {
     },
     onBarItemClickCallback () {
       const operation = new Operations(ConvertApi)
-      operation[this.action](this.fieldData)
+      console.info(this.fieldData)
+      operation[this.action](this.fieldData, () => {
+        this.$router.go(-1)
+      })
     },
     handleEdit () {
       this.fieldProps.map(value => {
@@ -133,7 +136,7 @@ export default {
       })
       this.isChange = true
       this.barCtrlList = ['edit']
-      this.title = '类型转换关系修改'
+      this.title = '类型池修改'
     }
   }
 }

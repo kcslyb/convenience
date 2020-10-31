@@ -5,7 +5,8 @@
     @on-left-click="onLeftClick"
     @on-right-click="onRightClick">
     <template slot="title-right">
-      <van-icon class="ico-default" size="20" name="records" @click="handleAddRecord" />
+      <van-icon v-show="!showChecked" class="ico-default" size="20" name="records" @click="handleAddRecord" />
+      <van-icon v-show="showChecked" class="ico-default" size="20" name="passed" @click="handleChooseRecord" />
     </template>
     <van-pull-refresh v-model="refreshing" success-text="刷新成功" @refresh="onRefresh">
       <van-list
@@ -22,6 +23,7 @@
           :title="item.oneTypeNumber + item.oneTypeUnitName + '=' + item.twoTypeNumber + item.twoTypeUnitName"
           :detail-item="item"
           :show-status="true"
+          :show-checked="showChecked"
           :status-name="item.createByName"
           :detail-props="detailProps"
           @on-click="handleClick(item)"
@@ -36,6 +38,7 @@ import CommonPage from '../../components/CommonPage'
 import KcsListItem from '../../components/KcsListItem'
 import { PullRefresh, List, Icon } from 'vant'
 import { ConvertApi } from '../../api/resources'
+import Operations from '../../utils/Operations'
 export default {
   name: 'StatisticalAnalysis',
   components: {
@@ -45,12 +48,24 @@ export default {
     VanIcon: Icon,
     VanPullRefresh: PullRefresh
   },
+  props: {
+    showChecked: {
+      type: Boolean,
+      default: false
+    },
+    // 是否可多选checked
+    checkedMultiple: {
+      type: Boolean,
+      default: false
+    }
+  },
   data () {
     return {
       loading: false,
       finished: false,
       refreshing: false,
       dataList: [],
+      currentItem: {},
       detailProps: [
         {
           prop: 'oneTypeNumber',
@@ -90,21 +105,42 @@ export default {
       })
     },
     handleClick (item) {
-      this.$router.push({
-        path: '/statistical/analysis/option',
-        query: { id: item.id }
-      })
+      if (this.showChecked) {
+        if (!this.checkedMultiple) {
+          this.dataList.map(value => {
+            const flag = (value.id === item.id)
+            this.$set(value, 'checked', flag)
+          })
+        }
+      } else {
+        this.$router.push({
+          path: '/statistical/analysis/option',
+          query: { id: item.id }
+        })
+      }
     },
     handleAddRecord () {
       this.$router.push({
         path: '/statistical/analysis/option'
       })
     },
-    handleTouch () {
-      console.info('handleTouch')
+    handleChooseRecord () {
+      const temp = this.dataList.filter(value => {
+        return value.checked
+      })
+      this.$emit('confirm', temp)
+    },
+    handleTouch (item) {
+      debugger
+      const opt = new Operations(ConvertApi)
+      opt.delete(item.id)
     },
     onLeftClick () {
-      this.$router.go(-1)
+      if (this.showChecked) {
+        this.$emit('on-left-click')
+      } else {
+        this.$router.go(-1)
+      }
     },
     onRightClick () {
       this.$emit('on-right-click')

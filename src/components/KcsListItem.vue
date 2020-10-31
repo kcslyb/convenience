@@ -28,7 +28,7 @@
             {{
               detailItem[item.prop]
                 ? moment(parseInt(detailItem[item.prop])).format(
-                    item.format ? item.format : "YYYY-MM-DD HH:mm"
+                    item.format ? item.format : "YYYY-MM-DD HH:mm:ss"
                   )
                 : ""
             }}
@@ -51,8 +51,12 @@
 
 <script>
 import moment from 'moment'
+import { Checkbox } from 'vant'
 export default {
   name: 'KcsListItem',
+  components: {
+    VanCheckbox: Checkbox
+  },
   props: {
     // 大标题
     title: {
@@ -127,6 +131,7 @@ export default {
   methods: {
     moment,
     handleClick () {
+      this.$set(this.detailItem, 'checked', !this.detailItem.checked)
       this.$emit('on-click', this.detailItem)
     },
     goTouchStart () {
