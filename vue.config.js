@@ -4,6 +4,7 @@ const path = require('path')
 const CompressionPlugin = require('compression-webpack-plugin') // Gzip
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const packageName = require('./package.json').name
+const IS_PROD = process.env.NODE_ENV === 'production'
 
 module.exports = {
   outputDir: `${packageName}`,
@@ -30,8 +31,8 @@ module.exports = {
     },
     proxy: {
       '/api': {
-        // target: 'http://127.0.0.1:8088',
-        target: 'http://118.178.120.226:8088',
+        target: 'http://127.0.0.1:8088',
+        // target: 'http://118.178.120.226:8088',
         pathRewrite: {
           '^/api': '/' // 删除基本路径
         }
@@ -55,6 +56,24 @@ module.exports = {
       .options({
         name: path.join('../main/static/', 'img/[name].[ext]')
       })
+    if (IS_PROD) {
+      config.optimization.minimizer('terser').tap((args) => {
+        // 注释console.*
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        args[0].terserOptions.compress.drop_console = true
+        // remove debugger
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        args[0].terserOptions.compress.drop_debugger = true
+        // 移除 console.log
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        args[0].terserOptions.compress.pure_funcs = ['console.log']
+        // 去掉注释 如果需要看chunk-vendors公共部分插件，可以注释掉就可以看到注释了
+        args[0].terserOptions.output = {
+          comments: false
+        }
+        return args
+      })
+    }
   },
   configureWebpack: config => {
     const pluginsPublic = []
@@ -67,7 +86,8 @@ module.exports = {
       })
     ]
     const pluginsDev = []
-    if (process.env.NODE_ENV === 'production') { // 为生产环境修改配置...process.env.NODE_ENV !== 'development'
+    if (IS_PROD) {
+      // 为生产环境修改配置...
       config.plugins = [...config.plugins, ...pluginsPro, ...pluginsPublic]
     } else {
       // 为开发环境修改配置...

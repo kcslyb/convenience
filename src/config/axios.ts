@@ -2,7 +2,9 @@ import * as axios from 'axios'
 import { AxiosResponse, AxiosRequestConfig } from 'axios'
 import EncryptHelper from 'kcs-common/utils/encryption-util'
 import { removeToken } from './auth'
-import { Notify } from 'vant'
+import { Notify, Toast } from 'vant'
+
+const tempToast = Toast
 
 const http = axios.default.create({
   baseURL: '/api',
@@ -16,10 +18,18 @@ http.interceptors.request.use(
       config.data = EncryptHelper.aesEncrypt(JSON.stringify(config.data))
     }
     config.headers = { 'Content-Type': 'application/json;charset=utf-8' }
+    tempToast.loading({
+      mask: true,
+      duration: 0,
+      forbidClick: true,
+      message: '加载中...',
+      loadingType: 'spinner',
+    });
     return config
   },
   (error: any) => {
     Notify({ type: 'danger', message: '加载超时' })
+    tempToast.clear()
     return Promise.reject(error)
   }
 )
@@ -30,9 +40,11 @@ http.interceptors.response.use(
     if (response.data && typeof (response.data) === 'string') {
       response.data = EncryptHelper.aesDecrypt(response.data)
     }
+    tempToast.clear()
     return response
   },
   (error: any) => {
+    tempToast.clear()
     let isDecrypt: boolean = error.response && error.response.data && typeof (error.response.data) === 'string'
     let msg: string = error.message
     if (isDecrypt) {

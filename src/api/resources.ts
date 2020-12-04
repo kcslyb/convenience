@@ -8,7 +8,8 @@ const Resources = (url: string, actions: object = {}) => {
     put: (params: object) => request.put(`/${url}`, params),
     delete: (id: string) => request.delete(`/${url}/${id}`),
     queryAll: (params: object) => request.get(`/${url}/query`, { params: params }),
-    queryPager: (params: object) => request.get(`/${url}/query/pager`, { params: params })
+    queryPager: (params: object) => request.get(`/${url}/query/pager`, { params: params }),
+    queryRelevance: (params: object) => request.get(`/${url}/query/relevance`, { params: params })
   }
   return Object.assign(resources, actions)
 }

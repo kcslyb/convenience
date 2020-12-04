@@ -2,6 +2,8 @@
   <common-page
     title="类型转换关系"
     :show-search="true"
+    :show-right-icon="true"
+    :loading="pageLoading"
     @on-left-click="onLeftClick"
     @on-right-click="onRightClick">
     <template slot="title-right">
@@ -36,6 +38,7 @@ import CommonPage from '../../components/CommonPage'
 import KcsListItem from '../../components/KcsListItem'
 import { PullRefresh, List, Icon } from 'vant'
 import { ConvertApi, ProductWorkApi } from '../../api/resources'
+import Operations from '../../utils/Operations'
 export default {
   name: 'EntityRelevance',
   components: {
@@ -50,28 +53,31 @@ export default {
       loading: false,
       finished: false,
       refreshing: false,
+      pageLoading: true,
       dataList: [],
       detailProps: [
         {
           prop: 'minNumber',
+          propSecond: 'minUnitName',
           label: '数量',
-          width: 40
-        }, {
-          prop: 'minUnitName',
-          label: '类型名',
-          width: 60
+          width: 50
         }, {
           prop: 'resultNumber',
-          label: '数量',
-          width: 40
+          propSecond: 'resultUnitName',
+          label: '合计',
+          width: 50
         }, {
-          prop: 'resultUnitName',
-          label: '类型名',
-          width: 60
+          prop: 'participantsNumber',
+          label: '人数',
+          width: 50
+        }, {
+          prop: 'average',
+          label: '人均',
+          width: 50
         }, {
           type: 'date',
-          prop: 'createTime',
-          label: '创建时间'
+          prop: 'happenTime',
+          label: '发生时间'
         }
       ]
     }
@@ -84,6 +90,7 @@ export default {
       this.onLoadData()
     },
     onLoadData () {
+      this.pageLoading = true
       ProductWorkApi.queryPager({}).then(res => {
         this.total = res.data.total
         this.dataList = res.data.list
@@ -91,6 +98,9 @@ export default {
         this.finished = true
         this.loading = true
         this.refreshing = false
+        this.pageLoading = false
+      }).catch(() => {
+        this.pageLoading = false
       })
     },
     handleClick (item) {
@@ -104,8 +114,11 @@ export default {
         path: '/entity/relevance/option'
       })
     },
-    handleTouch () {
-      console.info('handleTouch')
+    handleTouch (item) {
+      const opt = new Operations(ProductWorkApi)
+      opt.delete(item.id, () => {
+        this.onLoadData()
+      })
     },
     onLeftClick () {
       this.$router.go(-1)

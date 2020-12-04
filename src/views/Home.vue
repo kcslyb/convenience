@@ -81,7 +81,7 @@ export default {
       this.show = true
     },
     handleLogout () {
-      this.$store.dispatch('LogOut').then(res => {
+      this.$store.dispatch('LogOut').then(() => {
         this.$router.push('/login')
       }).catch((e) => { console.info(e) })
     },

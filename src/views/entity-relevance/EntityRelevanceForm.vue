@@ -46,6 +46,7 @@ export default {
       showChoose: false,
       fieldData: {},
       convertProducts: [],
+      baseConvertNumber: 0,
       dataList: [],
       fieldProps: [
         {
@@ -66,6 +67,50 @@ export default {
           options: [],
           required: true,
           rules: [{ required: true, message: '请选择成品数量类型' }]
+        }, {
+          type: 'date',
+          name: 'happenTime',
+          nameLabel: 'happenTimeLabel',
+          label: '发生时间',
+          required: true,
+          rules: [{ required: true, message: '请选择发生时间' }]
+        }, {
+          type: 'stepper',
+          name: 'participantsNumber',
+          label: '人数',
+          required: true,
+          rules: [{ required: true, message: '请填写人数' }]
+        }, {
+          type: 'textarea',
+          name: 'participants',
+          label: '参与者'
+        }, {
+          type: 'textarea',
+          name: 'remark',
+          label: '备注'
+        }
+      ],
+      infoProps: [
+        {
+          label: '创建人',
+          name: 'createByName',
+          readonlyFixed: true
+        }, {
+          type: 'date',
+          label: '创建时间',
+          name: 'createTime',
+          nameLabel: 'createTimeLabel',
+          readonlyFixed: true
+        }, {
+          label: '修改人',
+          name: 'updateByName',
+          readonlyFixed: true
+        }, {
+          type: 'date',
+          label: '修改时间',
+          name: 'updateTime',
+          nameLabel: 'updateTimeLabel',
+          readonlyFixed: true
         }
       ]
     }
@@ -85,6 +130,7 @@ export default {
         this.title = '类型转换关系新增'
       } else {
         this.barCtrlList = []
+        this.fieldProps = this.fieldProps.concat(this.infoProps)
         this.title = '类型转换关系详情'
         this.fieldProps.map(value => {
           value.readonly = true
@@ -93,6 +139,9 @@ export default {
           console.info(res.data)
           this.fieldData = res.data
           this.convertProducts = res.data.convertProducts || []
+          this.convertProducts.map(value => {
+            value.typeNumber = value.typeNumber.toFixed(3)
+          })
         })
       }
     },
@@ -102,20 +151,32 @@ export default {
       })
     },
     startCalculate () {
-      ConvertApi.queryPager({ oneTypeUnit: this.fieldData.minUnit }).then(res => {
-        console.info(res.data.list)
-        const temp = res.data.list || []
+      ConvertApi.queryRelevance({ relevance: this.fieldData.minUnit }).then(res => {
+        const temp = res.data || []
+        console.info(res.data)
         if (temp.length) {
-          const convert = temp[0]
-          const number = (this.fieldData.minNumber * convert.twoTypeNumber / convert.oneTypeNumber).toFixed(3)
-          const tempObj = {}
-          tempObj.typeNumber = number
-          tempObj.typeUnit = convert.twoTypeUnit
-          tempObj.typeUnitName = convert.twoTypeUnitName
-          this.convertProducts.push(tempObj)
-          console.info(this.convertProducts)
+          this.baseConvertNumber = this.fieldData.minNumber
+          this.convertProducts = []
+          temp.forEach(value => {
+            this.calculateConversion(value)
+          })
+        } else {
+          this.$notify({
+            type: 'warning',
+            message: '没有可以转换的关联关系'
+          })
         }
       })
+    },
+    // 计算单位换算
+    calculateConversion (convert) {
+      const number = (this.baseConvertNumber * convert.twoTypeNumber / convert.oneTypeNumber).toFixed(3)
+      this.baseConvertNumber = number
+      const tempObj = {}
+      tempObj.typeNumber = number
+      tempObj.typeUnit = convert.twoTypeUnit
+      tempObj.typeUnitName = convert.twoTypeUnitName
+      this.convertProducts.push(tempObj)
     },
     onLeftClick () {
       this.handleRightClick()
@@ -125,7 +186,14 @@ export default {
       this.$refs.statistical.$refs.KcsFieldForm.submit()
     },
     onBarItemClickCallback () {
-      this.fieldData.convertProducts = this.convertProducts
+      let convertTemp = {}
+      if (this.convertProducts.length) {
+        convertTemp = this.convertProducts[this.convertProducts.length - 1]
+        this.fieldData.resultUnit = convertTemp.typeUnit
+        this.fieldData.resultNumber = convertTemp.typeNumber
+        this.fieldData.resultUnitName = convertTemp.typeUnitName
+        this.fieldData.convertProducts = this.convertProducts
+      }
       console.info(this.fieldData)
       const operation = new Operations(ProductWorkApi)
       operation[this.action](this.fieldData, () => {

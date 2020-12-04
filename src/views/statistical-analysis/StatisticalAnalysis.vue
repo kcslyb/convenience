@@ -131,9 +131,10 @@ export default {
       this.$emit('confirm', temp)
     },
     handleTouch (item) {
-      debugger
       const opt = new Operations(ConvertApi)
-      opt.delete(item.id)
+      opt.delete(item.id, () => {
+        this.onLoadData()
+      })
     },
     onLeftClick () {
       if (this.showChecked) {
