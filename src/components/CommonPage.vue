@@ -16,6 +16,7 @@
       <div class="search">
         <kcs-search
           :filters="filters"
+          :show-right-icon="showRightIcon"
           :placeholder="`请输入${searchPlaceholder}查询`"
           @input="handleSearch"
           @search="handleSearch">
@@ -73,6 +74,10 @@ export default {
     filters: {
       type: Array,
       default: () => []
+    },
+    showRightIcon: {
+      type: Boolean,
+      default: false
     },
     loading: {
       type: Boolean,
@@ -134,6 +139,7 @@ export default {
   @import "../assets/style/common.less";
   .page-container {
     padding-top: 2.875rem;
+    padding-bottom: 2.875rem;
     background-color: @common-page-background-color;
   }
 

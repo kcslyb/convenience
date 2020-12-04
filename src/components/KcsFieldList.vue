@@ -1,7 +1,7 @@
 <script>
 import moment from 'moment'
 import KcsFileUpload from './KcsFileUpload.vue'
-import { Form, Field, Cell, RadioGroup, Radio, CheckboxGroup, Checkbox, Icon, Popup, Picker, DatetimePicker } from 'vant'
+import { Form, Field, Cell, RadioGroup, Radio, CheckboxGroup, Checkbox, Icon, Popup, Picker, DatetimePicker, stepper } from 'vant'
 export default {
   name: 'KcsFieldList',
   components: {
@@ -16,6 +16,7 @@ export default {
     VanRadioGroup: RadioGroup,
     VanCheckboxGroup: CheckboxGroup,
     VanDatetimePicker: DatetimePicker,
+    VanStepper: stepper,
     KcsFileUpload
   },
   props: {
@@ -235,6 +236,30 @@ export default {
         </div>
       )
     },
+    // 生成输入框 type: stepper
+    generateStepper (item) {
+      return (
+        <div class="nc-radio-container">
+          <div class={{
+            'label-class': true,
+            'van-cell--required': item.required
+          }}>
+            {item.label + ':'}</div>
+          <van-stepper
+            autosize={true}
+            type={'textarea'}
+            rules={item.rules}
+            disabled={item.readonly}
+            class="field-textarea"
+            label-class="label-class"
+            style="font-size: 0.8rem"
+            value={this.$attrs.value[item.name]}
+            onInput={(e) => {
+              this.$set(this.$attrs.value, item.name, e)
+            }}/>
+        </div>
+      )
+    },
     // 生成输入框 type: select
     generateSelect (item) {
       return (
@@ -380,7 +405,7 @@ export default {
     // 生成输入框 type: date
     generateDate (item) {
       if (item.name) {
-        const format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm'
+        const format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
         if (this.$attrs.value[item.name]) {
           let temp = ''
           const reg = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
@@ -512,10 +537,12 @@ export default {
               this.showDatetimePicker = false
             }}
             onConfirm={(item) => {
-              this.$set(this.$attrs.value, this.fieldItem.name, +new Date(item))
               const format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
+              const seconds = +new Date().getSeconds()
               const temp = moment(+new Date(item)).format(format)
-              this.$set(this.$attrs.value, this.fieldItem.nameLabel, temp)
+              const result = temp.substring(0, temp.length - 2) + seconds
+              this.$set(this.$attrs.value, this.fieldItem.nameLabel, result)
+              this.$set(this.$attrs.value, this.fieldItem.name, +new Date(result))
               this.showDatetimePicker = false
             }} />
         </van-popup>
@@ -531,7 +558,7 @@ export default {
           const temp = [].concat(errorInfo.errors)
           const errorMsg = []
           temp.forEach(value => {
-            errorMsg.push(value.message)
+            value.message && errorMsg.push(value.message)
           })
           this.$notify({
             type: 'warning',
@@ -557,7 +584,7 @@ export default {
 <style lang="less" scoped>
   .label-class {
     color: #6E7D93;
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
   .textarea-label {
     background-color: white;
@@ -573,15 +600,27 @@ export default {
     }
   }
   .nc-textarea {
-    border-bottom: .03rem solid #ebedf0;
+    text-align: left;
+    ::after {
+      position: absolute;
+      box-sizing: border-box;
+      content: ' ';
+      pointer-events: none;
+      right: .2rem;
+      bottom: 0;
+      left: .2rem;
+      border-bottom: 0.0625rem solid #ebedf0;
+      -webkit-transform: scaleY(.3);
+      transform: scaleY(.3);
+    }
   }
   .nc-radio-container{
     display: flex;
     align-items: center;
-    padding: 1rem 1.6rem;
+    padding: 0.625rem 1rem;
     background-color: white;
     justify-content: space-between;
-    border-bottom: .03rem solid #ebedf0;
+    border-bottom: 0.0625rem solid #ebedf0;
     .textarea-label {
       background-color: white;
       padding-left: 0;
