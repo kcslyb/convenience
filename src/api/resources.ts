@@ -1,4 +1,3 @@
-// @ts-ignore
 import request from '../config/axios'
 
 const Resources = (url: string, actions: object = {}) => {
@@ -25,4 +24,8 @@ export const ConvertApi = Resources('convert', {
 
 export const ProductWorkApi = Resources('productWork', {
   queryById: (id: string) =>  request.get(`/productWork/queryById?id=${id}`)
+})
+
+export const DayLogApi = Resources('dayLog', {
+  queryById: (id: string) =>  request.get(`/dayLog/queryById?id=${id}`)
 })

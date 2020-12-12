@@ -1,5 +1,5 @@
 import { Dialog } from 'vant'
-const CommonMixin =  {
+const CommonMixin = {
   data () {
     return {
       title: '',
@@ -10,7 +10,7 @@ const CommonMixin =  {
   },
   methods: {
     // 回退
-    handleRightClick() {
+    handleRightClick () {
       // @ts-ignore
       if (this.isChange) {
         Dialog.confirm({

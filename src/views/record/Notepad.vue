@@ -1,6 +1,6 @@
 <template>
   <common-page
-    title="类型转换关系"
+    title="记事本"
     :show-search="true"
     :show-right-icon="true"
     :loading="pageLoading"
@@ -21,7 +21,7 @@
         <kcs-list-item
           v-for="item in dataList"
           :key="item.id"
-          :title="item.minNumber + item.minUnitName + '=' + item.resultNumber + item.resultUnitName"
+          :title="item.title"
           :detail-item="item"
           :show-status="true"
           :status-name="item.createByName"
@@ -37,7 +37,7 @@
 import CommonPage from '../../components/CommonPage'
 import KcsListItem from '../../components/KcsListItem'
 import { PullRefresh, List, Icon } from 'vant'
-import { ProductWorkApi } from '../../api/resources'
+import { DayLogApi } from '../../api/resources'
 import Operations from '../../utils/Operations'
 export default {
   name: 'EntityRelevance',
@@ -57,27 +57,21 @@ export default {
       dataList: [],
       detailProps: [
         {
-          prop: 'minNumber',
-          propSecond: 'minUnitName',
-          label: '数量',
-          width: 50
+          prop: 'createByName',
+          label: '创建人',
+          width: 40
         }, {
-          prop: 'resultNumber',
-          propSecond: 'resultUnitName',
-          label: '合计',
-          width: 50
-        }, {
-          prop: 'participantsNumber',
-          label: '人数',
-          width: 50
-        }, {
-          prop: 'average',
-          label: '人均',
-          width: 50
+          type: 'date',
+          prop: 'createTime',
+          label: '创建时间',
+          width: 60
         }, {
           type: 'date',
           prop: 'happenTime',
           label: '发生时间'
+        }, {
+          prop: 'remark',
+          label: '备注'
         }
       ]
     }
@@ -91,7 +85,7 @@ export default {
     },
     onLoadData () {
       this.pageLoading = true
-      ProductWorkApi.queryPager({}).then(res => {
+      DayLogApi.queryPager({}).then(res => {
         this.total = res.data.total
         this.dataList = res.data.list
         console.info(res.data.list)
@@ -105,17 +99,17 @@ export default {
     },
     handleClick (item) {
       this.$router.push({
-        path: '/entity/relevance/option',
+        path: '/record/notepad/option',
         query: { id: item.id }
       })
     },
     handleAddRecord () {
       this.$router.push({
-        path: '/entity/relevance/option'
+        path: '/record/notepad/option'
       })
     },
     handleTouch (item) {
-      const opt = new Operations(ProductWorkApi)
+      const opt = new Operations(DayLogApi)
       opt.delete(item.id, () => {
         this.onLoadData()
       })

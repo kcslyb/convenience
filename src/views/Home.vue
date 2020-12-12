@@ -21,7 +21,7 @@
       <van-cell class="active" url="/statistical/analysis" icon="points" title="类型池" is-link />
       <van-cell class="active" url="/entity/relevance" icon="desktop-o" title="类型转换关系" is-link />
       <kcs-label title="事件记录"></kcs-label>
-      <van-cell class="active" url="#" icon="notes-o" title="事件记录统计" is-link />
+      <van-cell class="active" url="/record/notepad" icon="notes-o" title="事件记录统计" is-link />
     </div>
     <van-bar
       :active="active"

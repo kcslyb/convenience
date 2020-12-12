@@ -87,6 +87,8 @@ export default {
     min-height: 38vh;
     background-color: #A2BBBB;
     background-image: url("../assets/img/background-login.jpeg");
+    background-repeat: no-repeat;
+    background-size: 100%;
   }
 
   .login-form {

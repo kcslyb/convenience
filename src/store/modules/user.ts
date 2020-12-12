@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import store from '@/store/index'
 import { removeToken, setToken } from '@/config/auth.ts'
 import http from '@/config/axios.ts'
 import actions from "@/shared/actions";

@@ -47,7 +47,10 @@ export default {
   data () {
     return {
       showMore: false,
-      searchData: {}
+      searchData: {
+        name: '',
+        nameLabel: ''
+      }
     }
   },
   methods: {

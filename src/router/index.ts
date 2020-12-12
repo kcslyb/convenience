@@ -35,6 +35,16 @@ const routes = [
     path: '/entity/relevance/option',
     name: 'EntityRelevanceForm',
     component: () => import('@/views/entity-relevance/EntityRelevanceForm.vue')
+  },
+  {
+    path: '/record/notepad', // 事件记录
+    name: 'Notepad',
+    component: () => import('@/views/record/Notepad.vue')
+  },
+  {
+    path: '/record/notepad/option',
+    name: 'NotepadForm',
+    component: () => import('@/views/record/NotepadForm.vue')
   }
 ]
 const router = new VueRouter({

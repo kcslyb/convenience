@@ -75,6 +75,10 @@ export default {
     generateField (item) {
       return (
         <van-field
+          class={{
+            'input-picker': true,
+            'pointer-events-none': item.readonlyFixed
+          }}
           autosize={true}
           label-width={item.labelWidth ? item.labelWidth : 'auto'}
           type={item.fieldType}
@@ -86,13 +90,15 @@ export default {
           label-class="label-class"
           style="font-size: 0.8rem"
           rows={item.rows ? item.rows : 1}
-          placeholder={item.readonlyFixed || item.readonly ? '' : `请输入${item.label}`}
+          placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请输入${item.label}`)}
           value={this.$attrs.value[item.name]}
           show-word-limit={item.showWordLimit}
           maxlength={item.maxlength ? item.maxlength : 100}
           input-align={item.inputAlign ? item.inputAlign : 'right'}
           onInput={(e) => {
             this.$set(this.$attrs.value, item.name, e.trim())
+            const eventName = !item.event ? `on-${item.name}` : item.event
+            this.$emit(eventName, item)
           }}/>
       )
     },
@@ -131,6 +137,9 @@ export default {
                       onClick={() => {
                         if (!item.readonly) {
                           this.$set(this.$attrs.value, item.name, opt.value)
+                          if (item.nameLabel) {
+                            this.$set(this.$attrs.value, item.nameLabel, opt.label)
+                          }
                         }
                       }}>
                       {opt.label}
@@ -226,7 +235,7 @@ export default {
             label-class="label-class"
             style="font-size: 0.8rem"
             rows={item.rows ? item.rows : 2}
-            placeholder={item.readonly ? '' : `请输入${item.label}`}
+            placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请输入${item.label}`)}
             value={this.$attrs.value[item.name]}
             show-word-limit={item.showWordLimit ? !item.showWordLimit : true}
             maxlength={item.maxlength ? item.maxlength : 200}
@@ -236,36 +245,15 @@ export default {
         </div>
       )
     },
-    // 生成输入框 type: stepper
-    generateStepper (item) {
-      return (
-        <div class="nc-radio-container">
-          <div class={{
-            'label-class': true,
-            'van-cell--required': item.required
-          }}>
-            {item.label + ':'}</div>
-          <van-stepper
-            autosize={true}
-            type={'textarea'}
-            rules={item.rules}
-            disabled={item.readonly}
-            class="field-textarea"
-            label-class="label-class"
-            style="font-size: 0.8rem"
-            value={this.$attrs.value[item.name]}
-            onInput={(e) => {
-              this.$set(this.$attrs.value, item.name, e)
-            }}/>
-        </div>
-      )
-    },
     // 生成输入框 type: select
     generateSelect (item) {
       return (
         <van-field
           readonly={true}
-          class="input-picker"
+          class={{
+            'input-picker': true,
+            'pointer-events-none': item.readonlyFixed
+          }}
           required={item.required}
           rules={item.rules}
           error-message-align="right"
@@ -277,7 +265,7 @@ export default {
           label={item.label + ':'}
           label-class="label-class"
           style="font-size: 0.8rem"
-          placeholder={item.readonly ? '' : (item.placeholder ? item.placeholder : `请选择${item.label}`)}
+          placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
           validate-trigger="onChange"
           show-word-limit={item.showWordLimit}
@@ -294,12 +282,100 @@ export default {
         />
       )
     },
+    // 生成输多选选择动作面板 type: selectMultiple
+    generateSelectMultiple (item) {
+      return (
+        <div>
+          <van-field
+            readonly={true}
+            class={{
+              'input-picker': true,
+              'pointer-events-none': item.readonlyFixed
+            }}
+            required={item.required}
+            rules={item.rules}
+            error-message-align="right"
+            right-icon="arrow"
+            name={item.nameType}
+            disabled={item.disabled}
+            label-width={item.labelWidth ? item.labelWidth : 'auto'}
+            type={item.fieldType}
+            label={item.label + ':'}
+            label-class="label-class"
+            style="font-size: 0.8rem"
+            placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
+            attrs={{ value: this.$attrs.value[item.nameLabel] }}
+            validate-trigger="onChange"
+            show-word-limit={item.showWordLimit}
+            maxlength={item.maxlength ? item.maxlength : 100}
+            input-align={item.inputAlign ? item.inputAlign : 'right'}
+            onClick={() => {
+              this.fieldItem = item
+              // 通过readonlyFixed固定readonly
+              item.readonly = item.readonlyFixed ? item.readonlyFixed : item.readonly
+              if (!item.readonly) {
+                this.showActionSheetSelect = !item.readonly
+              }
+            }}
+          />
+          { this.multipleTmp(item, this.$attrs.value[item.name], this.$attrs.value[item.nameLabel]) }
+        </div>
+      )
+    },
+    multipleTmp (item, idStr, nameStr) {
+      const names = !nameStr ? [] : nameStr.split(',')
+      if (item.readonlyFixed) {
+        return (
+          <div class="multiple-tmp">
+            {
+              names.map(name => {
+                return (
+                  <div class="participant-item">
+                    <span>{name}</span>
+                  </div>
+                )
+              })
+            }
+          </div>
+        )
+      } else {
+        return (
+          <div class="multiple-select">
+            <div class="multiple-tmp">
+              {names.map((name, index) => {
+                return <div class="participant-item">
+                  <span>{name}</span>
+                  {!item.readonly &&
+                  <van-icon
+                    name="clear"
+                    class="participant-item-i"
+                    onClick={() => {
+                      names.splice(index, 1)
+                      const labelTemps = item.options.filter(value => names.includes(value[item.optionProps.label]))
+                      const ids = []
+                      labelTemps.forEach(value => {
+                        ids.push(value[item.optionProps.value])
+                      })
+                      this.$set(this.$attrs.value, item.name, ids.join(','))
+                      this.$set(this.$attrs.value, item.nameLabel, names.join(','))
+                    }}
+                  />}
+                </div>
+              })}
+            </div>
+          </div>
+        )
+      }
+    },
     // 生成自定义回调事件field type: invoke 用于点击时引入其它页面
     generateInvoke (item) {
       return (
         <van-field
           readonly={true}
-          class="input-picker"
+          class={{
+            'input-picker': true,
+            'pointer-events-none': item.readonlyFixed
+          }}
           required={item.required}
           rules={item.rules}
           error-message-align="right"
@@ -337,7 +413,7 @@ export default {
           { multipleTmpList.map(t => {
             return <div class="participant-item">
               <span>{t}</span>
-              {!item.readonly &&
+              {!item.readonlyFixed && !item.readonly &&
               <van-icon
                 class="participant-item-i"
                 name="clear"
@@ -364,7 +440,10 @@ export default {
         <div class="multiple-select">
           <van-field
             readonly={true}
-            class="input-picker"
+            class={{
+              'input-picker': true,
+              'pointer-events-none': item.readonlyFixed
+            }}
             required={item.required}
             rules={item.rules}
             error-message-align="right"
@@ -376,13 +455,7 @@ export default {
             label={item.label + ':'}
             label-class="label-class"
             style="font-size: 0.8rem"
-            placeholder={
-              item.readonly
-                ? ''
-                : item.placeholder
-                  ? item.placeholder
-                  : `请选择${item.label}`
-            }
+            placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
             attrs={{ value: this.$attrs.value[item.nameLabel] }}
             validate-trigger="onChange"
             show-word-limit={item.showWordLimit}
@@ -405,14 +478,16 @@ export default {
     // 生成输入框 type: date
     generateDate (item) {
       if (item.name) {
-        const format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
+        let format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
         if (this.$attrs.value[item.name]) {
           let temp = ''
           const reg = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
           if (reg.test(this.$attrs.value[item.name])) {
             temp = this.$attrs.value[item.name]
           } else {
-            temp = moment(parseInt(this.$attrs.value[item.name])).format(format)
+            format = format.replace(/-/g, '/')
+            temp = moment(new Date(this.$attrs.value[item.name])).format(format)
+            temp = temp.replace(/\//g, '-')
           }
           this.$set(this.$attrs.value, item.nameLabel, temp)
         } else {
@@ -421,6 +496,7 @@ export default {
       }
       return (
         <van-field
+          class={{ 'pointer-events-none': item.readonlyFixed }}
           readonly={true}
           required={item.required}
           rules={item.rules}
@@ -430,8 +506,8 @@ export default {
           label={item.label + ':'}
           label-class="label-class"
           style="font-size: 0.8rem"
-          placeholder={item.readonly ? '' : '点击选择'}
-          value={this.$attrs.value[item.nameLabel]}
+          placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
+          attrs={{ value: this.$attrs.value[item.nameLabel] }}
           input-align={item.inputAlign ? item.inputAlign : 'right'}
           onClick={() => {
             this.fieldItem = item
@@ -472,15 +548,14 @@ export default {
         />
       )
     },
-    // 生成图片上传组件 type: file
-    generateFile (item) {
-      if (item.type !== 'file') return ''
+    // 生成图片上传组件 type: img
+    generateImg (item) {
       let temp = this.$attrs.value[item.name] || []
       if (!Array.isArray(temp)) {
         temp = temp.split(',')
       }
       return (
-        <kcs-file-upload
+        <nc-file
           file-ids={temp}
           show-info={item.readonly}
           onOn-file-change={(fileList) => {
@@ -490,6 +565,9 @@ export default {
     },
     // action-sheet 一般下拉选
     actionSheet () {
+      if (!this.fieldItem.type || this.fieldItem.type !== 'select') {
+        return ''
+      }
       const option = this.fieldItem.optionProps ? this.fieldItem.optionProps : {
         label: 'label',
         value: 'value'
@@ -502,7 +580,6 @@ export default {
             this.showActionSheet = false
           }}>
           <van-picker
-            style="font-size: 0.8rem"
             show-toolbar={true}
             value-key={option.label}
             columns={this.fieldItem.options}
@@ -512,6 +589,9 @@ export default {
             onConfirm={(item) => {
               this.$set(this.$attrs.value, this.fieldItem.name, item[option.value])
               this.$set(this.$attrs.value, this.fieldItem.nameLabel, item[option.label])
+              // 点击事件回调 item.event 为事件名, 前提是设置isCallback为true,默认事件名为on-{item.ame}
+              const eventName = !this.fieldItem.event ? `on-${this.fieldItem.name}` : this.fieldItem.event
+              this.$emit(eventName, item)
               this.showActionSheet = false
             }}
           />
@@ -520,6 +600,9 @@ export default {
     },
     // datetime-picker 时间下拉选
     actionDatetimePicker () {
+      if (!this.fieldItem.type || this.fieldItem.type !== 'date') {
+        return ''
+      }
       return (
         <van-popup
           position="bottom"
@@ -528,7 +611,6 @@ export default {
             this.showDatetimePicker = false
           }}>
           <van-datetime-picker
-            style="font-size: 0.8rem"
             type={this.fieldItem.dateType ? this.fieldItem.dateType : 'datetime'}
             attrs={{ value: this.getDate }}
             min-date={this.fieldItem.minDate}
@@ -537,14 +619,92 @@ export default {
               this.showDatetimePicker = false
             }}
             onConfirm={(item) => {
-              const format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
-              const seconds = +new Date().getSeconds()
-              const temp = moment(+new Date(item)).format(format)
+              this.$set(this.$attrs.value, this.fieldItem.name, +new Date(item))
+              let format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
+              format = format.replace(/-/g, '/')
+              const seconds = new Date().getSeconds()
+              const temp = moment(new Date(item)).format(format)
               const result = temp.substring(0, temp.length - 2) + seconds
-              this.$set(this.$attrs.value, this.fieldItem.nameLabel, result)
+              this.$set(this.$attrs.value, this.fieldItem.nameLabel, result.replace(/\//, '-'))
               this.$set(this.$attrs.value, this.fieldItem.name, +new Date(result))
               this.showDatetimePicker = false
             }} />
+        </van-popup>
+      )
+    },
+    // actionSheetSelect 可多选动作面板
+    actionSheetSelect () {
+      if (!this.fieldItem.type || this.fieldItem.type !== 'selectMultiple') {
+        return ''
+      }
+      const options = this.fieldItem.options || []
+      const optionProps = this.fieldItem.optionProps ? this.fieldItem.optionProps : {
+        label: 'label',
+        value: 'value'
+      }
+      if (!this.tempCheckedList) {
+        this.tempCheckedList = this.$attrs.value[this.fieldItem.name] || ''
+      }
+      return (
+        <van-popup
+          position="bottom"
+          value={this.showActionSheetSelect}
+          onClick-overlay={() => {
+            this.showActionSheetSelect = false
+          }}>
+          <van-sticky>
+            <div class="van-picker__toolbar" style="background-color: #F2F2F2">
+              <button type="button" class="van-picker__cancel" onClick={() => {
+                this.tempCheckedList = ''
+                this.showActionSheetSelect = false
+              }}>取消</button>
+              <button type="button" class="van-picker__confirm" onClick={() => {
+                const temp = this.tempCheckedList.split(',')
+                this.$set(this.$attrs.value, this.fieldItem.name, this.tempCheckedList)
+                if (this.fieldItem.nameLabel) {
+                  const labelTemps = options.filter(value => temp.includes(value[optionProps.value]))
+                  const labels = []
+                  labelTemps.forEach(value => {
+                    labels.push(value[optionProps.label])
+                  })
+                  this.$set(this.$attrs.value, this.fieldItem.nameLabel, labels.join(','))
+                }
+                this.showActionSheetSelect = false
+              }}>确认</button>
+            </div>
+          </van-sticky>
+          <van-checkbox-group
+            value={!this.tempCheckedList ? [] : this.tempCheckedList.split(',')}
+            onInput={(checkedList) => {
+              this.tempCheckedList = checkedList.join(',')
+            }}>
+            <van-cell-group>
+              {
+                options.map((value, index) => {
+                  return (
+                    <van-cell
+                      title={value[optionProps.label]}
+                      key={'sheet_select_' + index}
+                      clickable={true}
+                      onClick={() => {
+                        this.$refs['check' + this.fieldItem.name + index].toggle()
+                      }}
+                      {...{
+                        scopedSlots: {
+                          'right-icon': () => {
+                            return (
+                              <van-checkbox
+                                name={value[optionProps.value]}
+                                ref={'check' + this.fieldItem.name + index} />
+                            )
+                          }
+                        }
+                      }}/>
+                  )
+                })
+              }
+            </van-cell-group>
+          </van-checkbox-group>
         </van-popup>
       )
     }
@@ -574,6 +734,7 @@ export default {
           })
         }
         { this.actionSheet() }
+        { this.actionSheetSelect() }
         { this.actionDatetimePicker() }
       </van-form>
     )
@@ -600,19 +761,7 @@ export default {
     }
   }
   .nc-textarea {
-    text-align: left;
-    ::after {
-      position: absolute;
-      box-sizing: border-box;
-      content: ' ';
-      pointer-events: none;
-      right: .2rem;
-      bottom: 0;
-      left: .2rem;
-      border-bottom: 0.0625rem solid #ebedf0;
-      -webkit-transform: scaleY(.3);
-      transform: scaleY(.3);
-    }
+    border-bottom: .0625rem solid #ebedf0;
   }
   .nc-radio-container{
     display: flex;
@@ -646,8 +795,8 @@ export default {
     background-color: #fff;
 
     .multiple-tmp {
-      position: relative;
       display: flex;
+      flex-wrap: wrap;
       background-color: #fff;
       padding: 0.6rem 0;
 
@@ -668,5 +817,8 @@ export default {
         }
       }
     }
+  }
+  .pointer-events-none {
+    pointer-events: none;
   }
 </style>

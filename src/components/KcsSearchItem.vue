@@ -1,7 +1,23 @@
 <script>
 import moment from 'moment'
 import KcsFileUpload from './KcsFileUpload.vue'
-import { Form, Field, Cell, RadioGroup, Radio, CheckboxGroup, Checkbox, Icon, Popup, Picker, DatetimePicker, stepper } from 'vant'
+import {
+  Form,
+  Field,
+  Cell,
+  Radio,
+  Icon,
+  Popup,
+  Picker,
+  Sticky,
+  Stepper,
+  Checkbox,
+  CellGroup,
+  RadioGroup,
+  CheckboxGroup,
+  DatetimePicker
+} from 'vant'
+
 export default {
   name: 'KcsSearchItem',
   components: {
@@ -11,32 +27,38 @@ export default {
     VanField: Field,
     VanPopup: Popup,
     VanRadio: Radio,
+    VanSticky: Sticky,
     VanPicker: Picker,
+    VanStepper: Stepper,
     VanCheckbox: Checkbox,
+    VanCellGroup: CellGroup,
     VanRadioGroup: RadioGroup,
     VanCheckboxGroup: CheckboxGroup,
     VanDatetimePicker: DatetimePicker,
-    VanStepper: stepper,
     KcsFileUpload
   },
   props: {
     // eg: [{name: 'prop', label: '参数名'}...]
-    filterItem: {
-      type: Object,
+    filterItems: {
+      type: Array,
       default: () => {
-        return {
-          type: 'date', // select | cell ...
-          name: 'prop',
-          label: '参数名',
-          nameType: 'datetimePicker', // actionSheet | datetimePicker
-          showType: 'showActionSheet', // showActionSheet | showDatetimePicker | showCalendar
-          dateType: 'dateTime' // year-month month-day | datetime | date | time
-        }
+        return [
+          {
+            type: 'date',
+            name: 'time',
+            label: '开始时间'
+          }, {
+            type: 'selectMultiple',
+            name: 'name',
+            nameLabel: 'nameLabel',
+            label: '多选逗号隔开'
+          }
+        ]
       }
     },
-    showErrorMessage: {
-      type: Boolean,
-      default: false
+    filterTitle: {
+      type: String,
+      default: '高级搜索'
     }
   },
   data () {
@@ -45,7 +67,9 @@ export default {
       showActionSheet: false,
       showDatetimePicker: false,
       boxList: [
-        { value: '132456', label: '测试选项一' }, { value: '1', label: '测试选项二' }, { value: '1', label: '测试选项三' }
+        { value: '11', label: '测试选项一' },
+        { value: '12', label: '测试选项二' },
+        { value: '13', label: '测试选项三' }
       ]
     }
   },
@@ -83,16 +107,16 @@ export default {
       return (
         <van-field
           readonly={true}
-          required={item.required}
           rules={item.rules}
-          right-icon={item.readonlyFixed ? '' : 'arrow'}
           name={item.nameType}
-          label-width={item.labelWidth ? item.labelWidth : 'auto'}
+          required={item.required}
           label={item.label + ':'}
           label-class="label-class"
           style="font-size: 0.8rem"
-          placeholder={item.readonly ? '' : '点击选择'}
           value={this.$attrs.value[item.nameLabel]}
+          right-icon={item.readonlyFixed ? '' : 'arrow'}
+          label-width={item.labelWidth ? item.labelWidth : 'auto'}
+          placeholder={item.readonly ? '' : `点击选择${item.label}`}
           input-align={item.inputAlign ? item.inputAlign : 'right'}
           onClick={() => {
             this.fieldItem = item
@@ -105,31 +129,174 @@ export default {
         />
       )
     },
-    // type: datetime 时间段下拉选
-    generateDateRange () {
+    // 生成输多选选择动作面板 type: selectMultiple
+    generateSelectMultiple (item) {
       return (
         <div>
-          <div>
-            {
-              this.generateDate()
-            }
-          </div>
-          <div>
-            {
-              this.generateDate()
-            }
-          </div>
+          <van-field
+            readonly={true}
+            class={{
+              'input-picker': true,
+              'pointer-events-none': item.readonlyFixed
+            }}
+            required={item.required}
+            rules={item.rules}
+            error-message-align="right"
+            right-icon="arrow"
+            name={item.nameType}
+            disabled={item.disabled}
+            label-width={item.labelWidth ? item.labelWidth : 'auto'}
+            type={item.fieldType}
+            label={item.label + ':'}
+            label-class="label-class"
+            style="font-size: 0.8rem"
+            placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
+            attrs={{ value: this.$attrs.value[item.nameLabel] }}
+            validate-trigger="onChange"
+            show-word-limit={item.showWordLimit}
+            maxlength={item.maxlength ? item.maxlength : 100}
+            input-align={item.inputAlign ? item.inputAlign : 'right'}
+            onClick={() => {
+              this.fieldItem = item
+              // 通过readonlyFixed固定readonly
+              item.readonly = item.readonlyFixed ? item.readonlyFixed : item.readonly
+              if (!item.readonly) {
+                this.showActionSheetSelect = !item.readonly
+              }
+            }}
+          />
+          { this.multipleTmp(item, this.$attrs.value[item.name], this.$attrs.value[item.nameLabel]) }
         </div>
       )
     },
-    // type: select
-    generateSelect () {
-      return (
-        <div>
-          <div>
-            23232
+    multipleTmp (item, idStr, nameStr) {
+      const names = !nameStr ? [] : nameStr.split(',')
+      if (item.readonlyFixed) {
+        return (
+          <div class="multiple-tmp">
+            {
+              names.map(name => {
+                return (
+                  <div class="participant-item">
+                    <span>{name}</span>
+                  </div>
+                )
+              })
+            }
           </div>
-        </div>
+        )
+      } else {
+        if (!item.optionProps) {
+          item.optionProps = {
+            value: 'value',
+            label: 'label'
+          }
+        }
+        if (!item.options) {
+          item.options = this.boxList
+        }
+        return (
+          <div class="multiple-select">
+            <div class="multiple-tmp">
+              {names.map((name, index) => {
+                return <div class="participant-item">
+                  <span>{name}</span>
+                  {!item.readonly &&
+                  <van-icon
+                    name="clear"
+                    class="participant-item-i"
+                    onClick={() => {
+                      names.splice(index, 1)
+                      const labelTemps = item.options.filter(value => names.includes(value[item.optionProps.label]))
+                      const ids = []
+                      labelTemps.forEach(value => {
+                        ids.push(value[item.optionProps.value])
+                      })
+                      this.$set(this.$attrs.value, item.name, ids.join(','))
+                      this.$set(this.$attrs.value, item.nameLabel, names.join(','))
+                    }}
+                  />}
+                </div>
+              })}
+            </div>
+          </div>
+        )
+      }
+    },
+    // actionSheetSelect 可多选动作面板
+    actionSheetSelect () {
+      if (!this.fieldItem.type || this.fieldItem.type !== 'selectMultiple') {
+        return ''
+      }
+      const options = this.fieldItem.options || this.boxList
+      const optionProps = this.fieldItem.optionProps ? this.fieldItem.optionProps : {
+        label: 'label',
+        value: 'value'
+      }
+      if (!this.tempCheckedList) {
+        this.tempCheckedList = this.$attrs.value[this.fieldItem.name] || ''
+      }
+      return (
+        <van-popup
+          position="bottom"
+          value={this.showActionSheetSelect}
+          onClick-overlay={() => {
+            this.showActionSheetSelect = false
+          }}>
+          <van-sticky>
+            <div class="van-picker__toolbar" style="background-color: #F2F2F2">
+              <button type="button" class="van-picker__cancel" onClick={() => {
+                this.tempCheckedList = ''
+                this.showActionSheetSelect = false
+              }}>取消</button>
+              <button type="button" class="van-picker__confirm" onClick={() => {
+                const temp = this.tempCheckedList.split(',')
+                this.$set(this.$attrs.value, this.fieldItem.name, this.tempCheckedList)
+                if (this.fieldItem.nameLabel) {
+                  const labelTemps = options.filter(value => temp.includes(value[optionProps.value]))
+                  const labels = []
+                  labelTemps.forEach(value => {
+                    labels.push(value[optionProps.label])
+                  })
+                  this.$set(this.$attrs.value, this.fieldItem.nameLabel, labels.join(','))
+                }
+                this.showActionSheetSelect = false
+              }}>确认</button>
+            </div>
+          </van-sticky>
+          <van-checkbox-group
+            value={!this.tempCheckedList ? [] : this.tempCheckedList.split(',')}
+            onInput={(checkedList) => {
+              this.tempCheckedList = checkedList.join(',')
+            }}>
+            <van-cell-group>
+              {
+                options.map((value, index) => {
+                  return (
+                    <van-cell
+                      title={value[optionProps.label]}
+                      key={'sheet_select_' + index}
+                      clickable={true}
+                      onClick={() => {
+                        this.$refs['check' + this.fieldItem.name + index].toggle()
+                      }}
+                      {...{
+                        scopedSlots: {
+                          'right-icon': () => {
+                            return (
+                              <van-checkbox
+                                name={value[optionProps.value]}
+                                ref={'check' + this.fieldItem.name + index} />
+                            )
+                          }
+                        }
+                      }}/>
+                  )
+                })
+              }
+            </van-cell-group>
+          </van-checkbox-group>
+        </van-popup>
       )
     },
     // datetime-picker 时间下拉选
@@ -142,7 +309,6 @@ export default {
             this.showDatetimePicker = false
           }}>
           <van-datetime-picker
-            style="font-size: 0.8rem"
             type={this.fieldItem.dateType ? this.fieldItem.dateType : 'datetime'}
             attrs={{ value: this.getDate }}
             min-date={this.fieldItem.minDate}
@@ -151,11 +317,13 @@ export default {
               this.showDatetimePicker = false
             }}
             onConfirm={(item) => {
-              const format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
-              const seconds = +new Date().getSeconds()
-              const temp = moment(+new Date(item)).format(format)
+              this.$set(this.$attrs.value, this.fieldItem.name, +new Date(item))
+              let format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
+              format = format.replace(/-/g, '/')
+              const seconds = new Date().getSeconds()
+              const temp = moment(new Date(item)).format(format)
               const result = temp.substring(0, temp.length - 2) + seconds
-              this.$set(this.$attrs.value, this.fieldItem.nameLabel, result)
+              this.$set(this.$attrs.value, this.fieldItem.nameLabel, result.replace(/\//, '-'))
               this.$set(this.$attrs.value, this.fieldItem.name, +new Date(result))
               this.showDatetimePicker = false
             }} />
@@ -166,9 +334,17 @@ export default {
   render () {
     return (
       <div class="search-item-container">
-        <div class="item-label">{this.filterItem.label}</div>
+        <div class="item-label">{this.filterTitle}</div>
         {
-          this.generate(this.filterItem)
+          this.filterItems.map(value => {
+            return this.generate(value)
+          })
+        }
+        {
+          this.actionDatetimePicker()
+        }
+        {
+          this.actionSheetSelect()
         }
       </div>
     )
@@ -177,7 +353,12 @@ export default {
 </script>
 
 <style scoped lang="less">
-.search-item-container {
-
-}
+  @import "../assets/style/common";
+  .search-item-container {
+    .item-label {
+      padding: .8rem 0;
+      color: @common-color;
+      background: @common-background-color;
+    }
+  }
 </style>
