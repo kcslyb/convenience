@@ -1,7 +1,7 @@
 <script>
 import moment from 'moment'
 import KcsFileUpload from './KcsFileUpload.vue'
-import { Form, Field, Cell, RadioGroup, Radio, CheckboxGroup, Checkbox, Icon, Popup, Picker, DatetimePicker, stepper } from 'vant'
+import { Form, Field, Cell, RadioGroup, Radio, CheckboxGroup, Checkbox, Icon, Popup, Picker, DatetimePicker, Stepper } from 'vant'
 export default {
   name: 'KcsFieldList',
   components: {
@@ -16,7 +16,7 @@ export default {
     VanRadioGroup: RadioGroup,
     VanCheckboxGroup: CheckboxGroup,
     VanDatetimePicker: DatetimePicker,
-    VanStepper: stepper,
+    VanStepper: Stepper,
     KcsFileUpload
   },
   props: {
@@ -94,12 +94,36 @@ export default {
           value={this.$attrs.value[item.name]}
           show-word-limit={item.showWordLimit}
           maxlength={item.maxlength ? item.maxlength : 100}
-          input-align={item.inputAlign ? item.inputAlign : 'right'}
+          input-align={item.inputAlign ? item.inputAlign : 'left'}
           onInput={(e) => {
             this.$set(this.$attrs.value, item.name, e.trim())
             const eventName = !item.event ? `on-${item.name}` : item.event
             this.$emit(eventName, item)
           }}/>
+      )
+    },
+    // 生成输入框 type: stepper
+    generateStepper (item) {
+      return (
+        <div class="nc-radio-container">
+          <div class={{
+            'label-class': true,
+            'van-cell--required': item.required
+          }}>
+            {item.label + ':'}</div>
+          <van-stepper
+            autosize={true}
+            type={'textarea'}
+            rules={item.rules}
+            disabled={item.readonly}
+            class="field-textarea"
+            label-class="label-class"
+            style="font-size: 0.8rem"
+            value={this.$attrs.value[item.name]}
+            onInput={(e) => {
+              this.$set(this.$attrs.value, item.name, e)
+            }}/>
+        </div>
       )
     },
     // 生成输入框 type: cell
@@ -270,7 +294,7 @@ export default {
           validate-trigger="onChange"
           show-word-limit={item.showWordLimit}
           maxlength={item.maxlength ? item.maxlength : 100}
-          input-align={item.inputAlign ? item.inputAlign : 'right'}
+          input-align={item.inputAlign ? item.inputAlign : 'left'}
           onClick={() => {
             this.fieldItem = item
             // 通过readonlyFixed固定readonly
@@ -308,7 +332,7 @@ export default {
             validate-trigger="onChange"
             show-word-limit={item.showWordLimit}
             maxlength={item.maxlength ? item.maxlength : 100}
-            input-align={item.inputAlign ? item.inputAlign : 'right'}
+            input-align={item.inputAlign ? item.inputAlign : 'left'}
             onClick={() => {
               this.fieldItem = item
               // 通过readonlyFixed固定readonly
@@ -392,7 +416,7 @@ export default {
           validate-trigger="onChange"
           show-word-limit={item.showWordLimit}
           maxlength={item.maxlength ? item.maxlength : 100}
-          input-align={item.inputAlign ? item.inputAlign : 'right'}
+          input-align={item.inputAlign ? item.inputAlign : 'left'}
           onClick={() => {
             // 通过readonlyFixed固定isCallback
             item.isCallback = item.readonlyFixed ? false : item.isCallback
@@ -460,7 +484,7 @@ export default {
             validate-trigger="onChange"
             show-word-limit={item.showWordLimit}
             maxlength={item.maxlength ? item.maxlength : 100}
-            input-align={item.inputAlign ? item.inputAlign : 'right'}
+            input-align={item.inputAlign ? item.inputAlign : 'left'}
             onClick={() => {
               // 通过readonlyFixed固定isCallback
               item.isCallback = item.readonlyFixed ? false : item.isCallback
@@ -508,7 +532,7 @@ export default {
           style="font-size: 0.8rem"
           placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
-          input-align={item.inputAlign ? item.inputAlign : 'right'}
+          input-align={item.inputAlign ? item.inputAlign : 'left'}
           onClick={() => {
             this.fieldItem = item
             // 通过readonlyFixed固定readonly
@@ -544,18 +568,19 @@ export default {
           style="font-size: 0.8rem"
           placeholder={item.readonly ? '' : '点击选择'}
           value={this.$attrs.value[item.nameLabel]}
-          input-align={item.inputAlign ? item.inputAlign : 'right'}
+          input-align={item.inputAlign ? item.inputAlign : 'left'}
         />
       )
     },
-    // 生成图片上传组件 type: img
-    generateImg (item) {
+    // 生成图片上传组件 type: file
+    generateFile (item) {
+      if (item.type !== 'file') return ''
       let temp = this.$attrs.value[item.name] || []
       if (!Array.isArray(temp)) {
         temp = temp.split(',')
       }
       return (
-        <nc-file
+        <kcs-file-upload
           file-ids={temp}
           show-info={item.readonly}
           onOn-file-change={(fileList) => {
@@ -751,6 +776,8 @@ export default {
     background-color: white;
     padding-left: 16px;
     padding-top: 10px;
+    text-align: left;
+
   }
   .field-textarea {
     /deep/.van-field__body {

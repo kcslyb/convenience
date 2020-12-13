@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { removeToken, setToken } from '@/config/auth.ts'
 import http from '@/config/axios.ts'
-import actions from "@/shared/actions";
 
 Vue.use(Vuex)
 
@@ -35,8 +34,6 @@ const user = {
       return new Promise((resolve, reject) => {
         http.post('/getInfo').then((res) => {
           if (res.data) {
-            // 储存用户信息
-            actions.setGlobalState({ user: res.data })
             // 储存用户信息
             commit('SET_USER', res.data)
             setToken()

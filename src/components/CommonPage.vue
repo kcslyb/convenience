@@ -1,9 +1,10 @@
 <template>
-  <div class="page-container">
+  <div :class="{'page-container': true, 'page-padding-bottom': showBar && barCtrlList.length}">
     <van-nav-bar :title="title" fixed>
       <template slot="left">
         <slot name="title-left">
           <van-icon class="ico-default" size="20" name="arrow-left" @click="handleClose" />
+          <span @click="handleClose">{{backTip}}</span>
         </slot>
       </template>
       <template slot="right">
@@ -62,6 +63,10 @@ export default {
     title: {
       type: String,
       default: '标题'
+    },
+    backTip: {
+      type: String,
+      default: '返回'
     },
     showSearch: {
       type: Boolean,
@@ -139,8 +144,10 @@ export default {
   @import "../assets/style/common.less";
   .page-container {
     padding-top: 2.875rem;
-    padding-bottom: 2.875rem;
     background-color: @common-page-background-color;
+  }
+  .page-padding-bottom {
+    padding-bottom: 2.875rem;
   }
 
   .ico-default {
