@@ -5,10 +5,13 @@ import './config/router'
 import './config/rem'
 import router from './router'
 import store from './store'
-import http from "@/config/axios"
+import http from '@/config/axios'
 import './assets/style/common.less'
+import directive from './utils/directive/index'
 
 Vue.config.productionTip = false
+
+Vue.use(directive)
 
 Vue.prototype.$service = http
 new Vue({
