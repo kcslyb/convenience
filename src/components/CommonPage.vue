@@ -38,7 +38,7 @@
         :name="item.name"
         v-show="barCtrlList.includes(item.action)"
         :icon="item.name"
-        @click="onBarItemClick(item)">
+        v-debound="{func: onBarItemClick(item)}">
         {{item.label}}</van-bar-item>
     </van-bar>
   </div>

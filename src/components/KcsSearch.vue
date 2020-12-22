@@ -12,9 +12,13 @@
     <van-popup
       v-model="showMore"
       position="right"
-      :style="{height: '100%', width: '80%'}"
+      :style="{height: '100%', width: '100%'}"
       @close="onPopupClose">
-      <kcs-search-item v-model="searchData"></kcs-search-item>
+      <kcs-search-item
+        v-model="searchData"
+        @left-click="handleMoreClose"
+        @right-click="handleMoreConfirm"
+      ></kcs-search-item>
     </van-popup>
   </div>
 </template>
@@ -63,6 +67,13 @@ export default {
     },
     onPopupClose () {
       this.showMore = false
+    },
+    handleMoreClose () {
+      this.showMore = false
+    },
+    handleMoreConfirm () {
+      this.showMore = false
+      this.$emit('on-search-confirm')
     }
   }
 }

@@ -45,8 +45,14 @@ export default {
         return [
           {
             type: 'date',
-            name: 'time',
+            name: 'startTime',
+            nameLabel: 'startTimeLabel',
             label: '开始时间'
+          }, {
+            type: 'date',
+            name: 'endDate',
+            nameLabel: 'endDateLabel',
+            label: '结束时间'
           }, {
             type: 'selectMultiple',
             name: 'name',
@@ -334,7 +340,18 @@ export default {
   render () {
     return (
       <div class="search-item-container">
-        <div class="item-label">{this.filterTitle}</div>
+        <div class="search-item-title">
+          <div class="title-left" onClick={() => {
+            this.$emit('left-click')
+          }}>
+            <van-icon size="16" name="arrow-left"/>
+            <span class="title-left-back">返回</span>
+          </div>
+          <div class="title-label">{this.filterTitle}</div>
+          <div class="title-right" onClick={() => {
+            this.$emit('left-click')
+          }}>确定</div>
+        </div>
         {
           this.filterItems.map(value => {
             return this.generate(value)
@@ -355,10 +372,31 @@ export default {
 <style scoped lang="less">
   @import "../assets/style/common";
   .search-item-container {
-    .item-label {
+    .search-item-title {
       padding: .8rem 0;
       color: @common-color;
       background: @common-background-color;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .title-label {
+        font-size: 1rem;
+      }
+      .title-left {
+        font-size: .9rem;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        padding: 0 .4rem;
+        .title-left-back {
+          font-size: .9rem;
+          line-height: 1.5rem;
+        }
+      }
+      .title-right {
+        font-size: .9rem;
+        padding: 0 .4rem;
+      }
     }
   }
 </style>
