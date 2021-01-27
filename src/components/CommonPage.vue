@@ -3,13 +3,15 @@
     <van-nav-bar :title="title" fixed>
       <template slot="left">
         <slot name="title-left">
-          <van-icon class="ico-default" size="20" name="arrow-left" @click="handleClose" />
-          <span @click="handleClose">{{backTip}}</span>
+          <div class="title-left-container" @click="handleClose">
+            <van-icon class="ico-default" size="20" name="arrow-left" @click.stop="handleClose" />
+            <span>{{backTip}}</span>
+          </div>
         </slot>
       </template>
       <template slot="right">
         <slot name="title-right">
-          <van-icon class="ico-default" size="20" name="bars" @click="handleMore" />
+          <van-icon class="ico-default" size="20" name="bars" @click.stop="handleMore" />
         </slot>
       </template>
     </van-nav-bar>
@@ -38,7 +40,7 @@
         :name="item.name"
         v-show="barCtrlList.includes(item.action)"
         :icon="item.name"
-        v-debound="{func: onBarItemClick(item)}">
+        @click="onBarItemClick(item)">
         {{item.label}}</van-bar-item>
     </van-bar>
   </div>
@@ -148,6 +150,12 @@ export default {
   }
   .page-padding-bottom {
     padding-bottom: 2.875rem;
+  }
+
+  .title-left-container {
+    display: flex;
+    justify-content: left;
+    align-items: center;
   }
 
   .ico-default {

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { removeToken, setToken } from '@/config/auth.ts'
 import http from '@/config/axios.ts'
+import store from "@/store";
 
 Vue.use(Vuex)
 
@@ -37,8 +38,9 @@ const user = {
             // 储存用户信息
             commit('SET_USER', res.data)
             setToken()
-            // store.dispatch('GenerateRoutes', res.data).then(() => {
-            // })
+            store.dispatch('generateRoutes', res.data.permissions || []).catch((e) => {
+              throw Error(e)
+            })
             resolve(res.data)
           }
         }).catch((error) => {

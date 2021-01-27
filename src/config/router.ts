@@ -2,7 +2,7 @@ import router from '@/router'
 import store from '@/store/index'
 import { getToken } from './auth'
 import { Route } from 'vue-router'
-const whiteList = ['/login', '/test', '/store', '/product']
+const whiteList = ['/login', '/test']
 router.beforeEach((to: Route, from: Route, next: any) => {
   if (getToken() === 'JSESSIONID') { // 已经登录
     if (!store.getters.role) {

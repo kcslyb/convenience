@@ -29,3 +29,6 @@ export const ProductWorkApi = Resources('productWork', {
 export const DayLogApi = Resources('dayLog', {
   queryById: (id: string) =>  request.get(`/dayLog/queryById?id=${id}`)
 })
+export const FileApi = Resources('file', {
+  accessFileBase64: (ids: string) =>  request.post('/file/accessFileBase64', ids)
+})
