@@ -2,6 +2,7 @@
   <div>
     <van-search
       :placeholder="placeholder"
+      v-model="keyWord"
       @input="handleSearch"
       @search="handleSearch"
     >
@@ -16,8 +17,8 @@
       @close="onPopupClose">
       <kcs-search-item
         v-model="searchData"
-        @left-click="handleMoreClose"
-        @right-click="handleMoreConfirm"
+        @cancel-click="handleMoreClose"
+        @confirm-click="handleMoreConfirm"
       ></kcs-search-item>
     </van-popup>
   </div>
@@ -50,6 +51,8 @@ export default {
   },
   data () {
     return {
+      timer: '',
+      keyWord: '',
       showMore: false,
       searchData: {
         name: '',
@@ -59,7 +62,13 @@ export default {
   },
   methods: {
     handleSearch (value) {
-      this.$emit('on-search', value)
+      if (this.timer) {
+        clearTimeout(this.timer)
+      }
+      // 等待timeout的时间间隔后执行
+      this.timer = setTimeout(() => {
+        this.$emit('on-search', value)
+      }, 2000)
     },
     searchRightClick () {
       this.showMore = true
@@ -73,7 +82,7 @@ export default {
     },
     handleMoreConfirm () {
       this.showMore = false
-      this.$emit('on-search-confirm')
+      this.$emit('on-search-confirm', this.searchData)
     }
   }
 }

@@ -21,8 +21,8 @@
           :filters="filters"
           :show-right-icon="showRightIcon"
           :placeholder="`请输入${searchPlaceholder}查询`"
-          @input="handleSearch"
-          @search="handleSearch">
+          @on-search="handleSearch"
+          @on-search-confirm="handleSearchConfirm">
         </kcs-search>
       </div>
     </van-sticky>
@@ -123,6 +123,9 @@ export default {
     }
   },
   methods: {
+    handleSearchConfirm (searchData) {
+      this.$emit('on-search-confirm', searchData)
+    },
     handleSearch (query) {
       this.$emit('on-search', query)
     },

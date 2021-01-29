@@ -4,8 +4,10 @@
     :show-search="true"
     :show-right-icon="true"
     :loading="pageLoading"
+    @on-search="handleSearch"
     @on-left-click="onLeftClick"
-    @on-right-click="onRightClick">
+    @on-right-click="onRightClick"
+    @on-search-confirm="handleSearchConfirm">
     <template slot="title-right">
       <van-icon class="ico-default" size="20" name="records" @click="handleAddRecord" />
     </template>
@@ -90,6 +92,14 @@ export default {
     onLoadData () {
       this.condition.start = this.condition.start + 1
       this.queryData()
+    },
+    handleSearch (keyWord) {
+      this.condition.keyWord = keyWord
+      this.onRefresh()
+    },
+    handleSearchConfirm (searchData) {
+      this.condition = Object.assign(this.condition, searchData)
+      this.onRefresh()
     },
     queryData () {
       this.pageLoading = true

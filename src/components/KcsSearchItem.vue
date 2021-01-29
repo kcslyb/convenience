@@ -58,11 +58,11 @@ export default {
             name: 'name',
             nameLabel: 'nameLabel',
             label: '多选逗号隔开'
-          // }, {
-          //   type: 'select',
-          //   name: 'nameName',
-          //   nameLabel: 'nameLabelLabel',
-          //   label: '多选逗号隔开'
+          }, {
+            type: 'select',
+            name: 'nameName',
+            nameLabel: 'nameLabelLabel',
+            label: '单选'
           }
         ]
       }
@@ -245,6 +245,79 @@ export default {
         )
       }
     },
+    // 生成输入框 type: select
+    generateSelect (item) {
+      return (
+        <van-field
+          readonly={true}
+          class={{
+            'input-picker': true,
+            'pointer-events-none': item.readonlyFixed
+          }}
+          required={item.required}
+          rules={item.rules}
+          error-message-align="right"
+          right-icon="arrow"
+          name={item.nameType}
+          disabled={item.disabled}
+          label-width={item.labelWidth ? item.labelWidth : 'auto'}
+          type={item.fieldType}
+          label={item.label + ':'}
+          label-class="label-class"
+          style="font-size: 1rem"
+          placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
+          attrs={{ value: this.$attrs.value[item.nameLabel] }}
+          validate-trigger="onChange"
+          show-word-limit={item.showWordLimit}
+          maxlength={item.maxlength ? item.maxlength : 100}
+          input-align={item.inputAlign ? item.inputAlign : 'right'}
+          onClick={() => {
+            this.fieldItem = item
+            // 通过readonlyFixed固定readonly
+            item.readonly = item.readonlyFixed ? item.readonlyFixed : item.readonly
+            if (!item.readonly) {
+              this.showActionSheet = !item.readonly
+            }
+          }}
+        />
+      )
+    },
+    // action-sheet 一般下拉选
+    actionSheet () {
+      if (!this.fieldItem.type || this.fieldItem.type !== 'select') {
+        return ''
+      }
+      const optionProps = this.fieldItem.optionProps ? this.fieldItem.optionProps : {
+        label: 'label',
+        value: 'value'
+      }
+      const options = this.fieldItem.options || this.boxList
+      return (
+        <van-popup
+          position="bottom"
+          value={this.showActionSheet}
+          onClick-overlay={() => {
+            this.showActionSheet = false
+          }}>
+          <van-picker
+            show-toolbar={true}
+            value-key={optionProps.label}
+            columns={options}
+            onCancel={() => {
+              this.showActionSheet = false
+            }}
+            onConfirm={(item) => {
+              this.$set(this.$attrs.value, this.fieldItem.name, item[optionProps.value])
+              this.$set(this.$attrs.value, this.fieldItem.nameLabel, item[optionProps.label])
+              // 点击事件回调 item.event 为事件名, 前提是设置isCallback为true,默认事件名为on-{item.ame}
+              const eventName = !this.fieldItem.event ? `on-${this.fieldItem.name}` : this.fieldItem.event
+              this.$emit(eventName, item)
+              this.showActionSheet = false
+            }}
+          />
+        </van-popup>
+      )
+    },
     // actionSheetSelect 可多选动作面板
     actionSheetSelect () {
       if (!this.fieldItem.type || this.fieldItem.type !== 'selectMultiple') {
@@ -358,14 +431,14 @@ export default {
       <div class="search-item-container">
         <div class="search-item-title">
           <div class="title-left" onClick={() => {
-            this.$emit('left-click')
+            this.$emit('cancel-click')
           }}>
             <van-icon size="16" name="arrow-left"/>
             <span class="title-left-back">返回</span>
           </div>
           <div class="title-label">{this.filterTitle}</div>
           <div class="title-right" onClick={() => {
-            this.$emit('left-click')
+            this.$emit('confirm-click')
           }}>确定</div>
         </div>
         {
@@ -378,6 +451,9 @@ export default {
         }
         {
           this.actionSheetSelect()
+        }
+        {
+          this.actionSheet()
         }
       </div>
     )
