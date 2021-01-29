@@ -218,7 +218,7 @@ export default {
       width: auto;
       text-align: left;
       display: inline-block;
-      font-size: .78rem;
+      font-size: .8rem;
 
       .label-value {
         padding: 0.3rem 0;

@@ -23,7 +23,7 @@ import { Icon } from 'vant'
 import KcsLabel from '../../components/KcsLabel'
 import CommonPage from '../../components/CommonPage'
 import KcsFieldList from '../../components/KcsFieldList'
-import { DayLogApi } from '../../api/resources'
+import { DayLogApi, DictApi } from '../../api/resources'
 import Operations from '../../utils/Operations'
 import CommonMixin from '../mixins/CommonMixin'
 export default {
@@ -44,6 +44,18 @@ export default {
       dataList: [],
       fieldProps: [
         {
+          type: 'select',
+          label: '记录类型',
+          name: 'reservedKeyOne',
+          nameLabel: 'reservedKeyTwo',
+          required: true,
+          rules: [{ required: true, message: '请选择记录类型' }],
+          optionProps: {
+            value: 'key',
+            label: 'label'
+          },
+          options: []
+        }, {
           name: 'title',
           label: '标题',
           required: true,
@@ -65,6 +77,7 @@ export default {
   },
   created () {
     this.initData()
+    this.queryDictOptions()
   },
   methods: {
     initData () {
@@ -90,6 +103,12 @@ export default {
           })
         })
       }
+    },
+    queryDictOptions () {
+      DictApi.queryByDictGroupLabel('eventType').then(res => {
+        console.info(res.data)
+        this.fieldProps[0].options = res.data
+      })
     },
     onLeftClick () {
       this.handleRightClick()

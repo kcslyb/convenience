@@ -88,7 +88,7 @@ export default {
           required={item.required}
           error-message-align="right"
           label-class="label-class"
-          style="font-size: 0.8rem"
+          style="font-size: 1rem"
           rows={item.rows ? item.rows : 1}
           placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请输入${item.label}`)}
           value={this.$attrs.value[item.name]}
@@ -118,7 +118,7 @@ export default {
             disabled={item.readonly}
             class="field-textarea"
             label-class="label-class"
-            style="font-size: 0.8rem"
+            style="font-size: 1rem"
             value={this.$attrs.value[item.name]}
             onInput={(e) => {
               this.$set(this.$attrs.value, item.name, e)
@@ -132,7 +132,7 @@ export default {
         <van-cell
           value={this.$attrs.value[item.name]}
           title={item.label + ':'}
-          style="font-size: 0.8rem"
+          style="font-size: 1rem"
         />
       )
     },
@@ -257,7 +257,7 @@ export default {
             label-width={item.labelWidth ? item.labelWidth : 'auto'}
             class="field-textarea"
             label-class="label-class"
-            style="font-size: 0.8rem"
+            style="font-size: 1rem"
             rows={item.rows ? item.rows : 2}
             placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请输入${item.label}`)}
             value={this.$attrs.value[item.name]}
@@ -288,7 +288,7 @@ export default {
           type={item.fieldType}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 0.8rem"
+          style="font-size: 1rem"
           placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
           validate-trigger="onChange"
@@ -326,7 +326,7 @@ export default {
             type={item.fieldType}
             label={item.label + ':'}
             label-class="label-class"
-            style="font-size: 0.8rem"
+            style="font-size: 1rem"
             placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
             attrs={{ value: this.$attrs.value[item.nameLabel] }}
             validate-trigger="onChange"
@@ -410,7 +410,7 @@ export default {
           type={item.fieldType}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 0.8rem"
+          style="font-size: 1rem"
           placeholder={item.readonly ? '' : (item.placeholder ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
           validate-trigger="onChange"
@@ -478,7 +478,7 @@ export default {
             type={item.fieldType}
             label={item.label + ':'}
             label-class="label-class"
-            style="font-size: 0.8rem"
+            style="font-size: 1rem"
             placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
             attrs={{ value: this.$attrs.value[item.nameLabel] }}
             validate-trigger="onChange"
@@ -529,7 +529,7 @@ export default {
           label-width={item.labelWidth ? item.labelWidth : 'auto'}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 0.8rem"
+          style="font-size: 1rem"
           placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
           input-align={item.inputAlign ? item.inputAlign : 'left'}
@@ -565,7 +565,7 @@ export default {
           label-width={item.labelWidth ? item.labelWidth : 'auto'}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 0.8rem"
+          style="font-size: 1rem"
           placeholder={item.readonly ? '' : '点击选择'}
           value={this.$attrs.value[item.nameLabel]}
           input-align={item.inputAlign ? item.inputAlign : 'left'}
@@ -770,7 +770,7 @@ export default {
 <style lang="less" scoped>
   .label-class {
     color: #6E7D93;
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
   .textarea-label {
     background-color: white;

@@ -21,7 +21,7 @@
         <kcs-list-item
           v-for="item in dataList"
           :key="item.id"
-          :title="item.title"
+          :title="item.reservedKeyTwo"
           :detail-item="item"
           :show-status="true"
           :status-name="item.createByName"
@@ -55,16 +55,17 @@ export default {
       refreshing: false,
       pageLoading: true,
       dataList: [],
+      condition: {
+        start: 1,
+        size: 10
+      },
       detailProps: [
         {
-          prop: 'createByName',
-          label: '创建人',
-          width: 40
+          prop: 'title',
+          label: '标题'
         }, {
-          type: 'date',
-          prop: 'createTime',
-          label: '创建时间',
-          width: 60
+          prop: 'createByName',
+          label: '创建人'
         }, {
           type: 'date',
           prop: 'happenTime',
@@ -77,19 +78,26 @@ export default {
     }
   },
   created () {
-    this.onLoadData()
+    this.dataList = []
+    this.queryData()
   },
   methods: {
     onRefresh () {
-      this.onLoadData()
+      this.condition.start = 1
+      this.dataList = []
+      this.queryData()
     },
     onLoadData () {
+      this.condition.start = this.condition.start + 1
+      this.queryData()
+    },
+    queryData () {
       this.pageLoading = true
-      DayLogApi.queryPager({}).then(res => {
+      DayLogApi.queryPager(this.condition).then(res => {
         this.total = res.data.total
-        this.dataList = res.data.list
+        this.dataList = this.dataList.concat(res.data.list)
         console.info(res.data.list)
-        this.finished = true
+        this.finished = this.condition.start * this.condition.size >= this.total
         this.loading = true
         this.refreshing = false
         this.pageLoading = false
@@ -111,7 +119,7 @@ export default {
     handleTouch (item) {
       const opt = new Operations(DayLogApi)
       opt.delete(item.id, () => {
-        this.onLoadData()
+        this.onRefresh()
       })
     },
     onLeftClick () {

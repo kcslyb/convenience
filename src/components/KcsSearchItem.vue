@@ -58,6 +58,11 @@ export default {
             name: 'name',
             nameLabel: 'nameLabel',
             label: '多选逗号隔开'
+          // }, {
+          //   type: 'select',
+          //   name: 'nameName',
+          //   nameLabel: 'nameLabelLabel',
+          //   label: '多选逗号隔开'
           }
         ]
       }
@@ -70,13 +75,22 @@ export default {
   data () {
     return {
       fieldItem: {},
+      tempCheckedList: '',
       showActionSheet: false,
       showDatetimePicker: false,
+      showActionSheetSelect: false,
       boxList: [
         { value: '11', label: '测试选项一' },
         { value: '12', label: '测试选项二' },
         { value: '13', label: '测试选项三' }
       ]
+    }
+  },
+  watch: {
+    showActionSheetSelect () {
+      if (this.showActionSheetSelect && this.$attrs.value[this.fieldItem.name]) {
+        this.tempCheckedList = this.$attrs.value[this.fieldItem.name] || ''
+      }
     }
   },
   computed: {
@@ -118,7 +132,7 @@ export default {
           required={item.required}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 0.8rem"
+          style="font-size: 1rem"
           value={this.$attrs.value[item.nameLabel]}
           right-icon={item.readonlyFixed ? '' : 'arrow'}
           label-width={item.labelWidth ? item.labelWidth : 'auto'}
@@ -155,7 +169,7 @@ export default {
             type={item.fieldType}
             label={item.label + ':'}
             label-class="label-class"
-            style="font-size: 0.8rem"
+            style="font-size: 1rem"
             placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
             attrs={{ value: this.$attrs.value[item.nameLabel] }}
             validate-trigger="onChange"
@@ -206,22 +220,24 @@ export default {
             <div class="multiple-tmp">
               {names.map((name, index) => {
                 return <div class="participant-item">
-                  <span>{name}</span>
-                  {!item.readonly &&
-                  <van-icon
-                    name="clear"
-                    class="participant-item-i"
-                    onClick={() => {
-                      names.splice(index, 1)
-                      const labelTemps = item.options.filter(value => names.includes(value[item.optionProps.label]))
-                      const ids = []
-                      labelTemps.forEach(value => {
-                        ids.push(value[item.optionProps.value])
-                      })
-                      this.$set(this.$attrs.value, item.name, ids.join(','))
-                      this.$set(this.$attrs.value, item.nameLabel, names.join(','))
-                    }}
-                  />}
+                  <div class="multiple-item">
+                    <span>{name}</span>
+                    {!item.readonly &&
+                    <van-icon
+                      name="clear"
+                      class="participant-item-i"
+                      onClick={() => {
+                        names.splice(index, 1)
+                        const labelTemps = item.options.filter(value => names.includes(value[item.optionProps.label]))
+                        const ids = []
+                        labelTemps.forEach(value => {
+                          ids.push(value[item.optionProps.value])
+                        })
+                        this.$set(this.$attrs.value, item.name, ids.join(','))
+                        this.$set(this.$attrs.value, item.nameLabel, names.join(','))
+                      }}
+                    />}
+                  </div>
                 </div>
               })}
             </div>
@@ -383,19 +399,33 @@ export default {
         font-size: 1rem;
       }
       .title-left {
-        font-size: .9rem;
+        font-size: 1rem;
         display: flex;
         justify-content: left;
         align-items: center;
         padding: 0 .4rem;
         .title-left-back {
-          font-size: .9rem;
+          font-size: 1rem;
           line-height: 1.5rem;
         }
       }
       .title-right {
-        font-size: .9rem;
+        font-size: 1rem;
         padding: 0 .4rem;
+      }
+    }
+  }
+  .multiple-tmp {
+    text-align: left;
+    .participant-item {
+      display: inline-block;
+      margin-left: .8rem;
+      .multiple-item {
+        padding: 0.5rem 0;
+        border: 1px solid @common-border-color;
+        .participant-item-i {
+          transform: translateY(-.4rem);
+        }
       }
     }
   }
