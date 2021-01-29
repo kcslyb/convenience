@@ -4,6 +4,8 @@
     :show-search="true"
     :show-right-icon="true"
     :loading="pageLoading"
+    :filters="filterProps"
+    v-model="searchData"
     @on-search="handleSearch"
     @on-left-click="onLeftClick"
     @on-right-click="onRightClick"
@@ -39,7 +41,7 @@
 import CommonPage from '../../components/CommonPage'
 import KcsListItem from '../../components/KcsListItem'
 import { PullRefresh, List, Icon } from 'vant'
-import { DayLogApi } from '../../api/resources'
+import { DayLogApi, DictApi } from '../../api/resources'
 import Operations from '../../utils/Operations'
 export default {
   name: 'EntityRelevance',
@@ -56,6 +58,7 @@ export default {
       finished: false,
       refreshing: false,
       pageLoading: true,
+      searchData: {},
       dataList: [],
       condition: {
         start: 1,
@@ -76,12 +79,36 @@ export default {
           prop: 'remark',
           label: '备注'
         }
+      ],
+      filterProps: [
+        {
+          type: 'date',
+          name: 'startTimeStamp',
+          nameLabel: 'startTime',
+          label: '开始时间'
+        }, {
+          type: 'date',
+          name: 'endTimeStamp',
+          nameLabel: 'endTime',
+          label: '结束时间'
+        }, {
+          type: 'select',
+          name: 'reservedKeyOne',
+          nameLabel: 'reservedKeyOneLabel',
+          label: '事件类型',
+          optionProps: {
+            value: 'key',
+            label: 'label'
+          },
+          options: []
+        }
       ]
     }
   },
   created () {
     this.dataList = []
     this.queryData()
+    this.queryDictOptions()
   },
   methods: {
     onRefresh () {
@@ -98,11 +125,17 @@ export default {
       this.onRefresh()
     },
     handleSearchConfirm (searchData) {
+      this.$store.dispatch('SET_NOTEPAD_PARAMS', searchData)
       this.condition = Object.assign(this.condition, searchData)
       this.onRefresh()
     },
     queryData () {
       this.pageLoading = true
+      const params = this.$store.getters.notepadParams
+      if (params) {
+        this.searchData = params
+        this.condition = Object.assign({}, this.condition, params)
+      }
       DayLogApi.queryPager(this.condition).then(res => {
         this.total = res.data.total
         this.dataList = this.dataList.concat(res.data.list)
@@ -114,6 +147,14 @@ export default {
       }).catch(() => {
         this.pageLoading = false
       })
+    },
+    queryDictOptions () {
+      if (this.filterProps[2].options.length === 0) {
+        DictApi.queryByDictGroupLabel('eventType').then(res => {
+          console.info(res.data)
+          this.filterProps[2].options = res.data
+        })
+      }
     },
     handleClick (item) {
       this.$router.push({

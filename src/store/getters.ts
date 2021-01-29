@@ -6,5 +6,6 @@ const getters = {
   userName: (state: any) => state.user.userInfo.userName,
   permissions: (state: any) => state.user.userInfo.permissions,
   currentMenus: (state: any) => state.menu.currentMenus,
-};
+  notepadParams: (state: any) => state.common.notepadParams,
+}
 export default getters

@@ -16,7 +16,8 @@
       :style="{height: '100%', width: '100%'}"
       @close="onPopupClose">
       <kcs-search-item
-        v-model="searchData"
+        :filterItems="filters"
+        v-model="this.$attrs.value"
         @cancel-click="handleMoreClose"
         @confirm-click="handleMoreConfirm"
       ></kcs-search-item>
@@ -53,11 +54,7 @@ export default {
     return {
       timer: '',
       keyWord: '',
-      showMore: false,
-      searchData: {
-        name: '',
-        nameLabel: ''
-      }
+      showMore: false
     }
   },
   methods: {
@@ -82,7 +79,7 @@ export default {
     },
     handleMoreConfirm () {
       this.showMore = false
-      this.$emit('on-search-confirm', this.searchData)
+      this.$emit('on-search-confirm', this.$attrs.value)
     }
   }
 }

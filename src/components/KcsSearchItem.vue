@@ -45,13 +45,13 @@ export default {
         return [
           {
             type: 'date',
-            name: 'startTime',
-            nameLabel: 'startTimeLabel',
+            name: 'startTimeStamp',
+            nameLabel: 'startTime',
             label: '开始时间'
           }, {
             type: 'date',
-            name: 'endDate',
-            nameLabel: 'endDateLabel',
+            name: 'endTimeStamp',
+            nameLabel: 'endTime',
             label: '结束时间'
           }, {
             type: 'selectMultiple',

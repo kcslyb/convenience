@@ -19,6 +19,7 @@
       <div class="search">
         <kcs-search
           :filters="filters"
+          v-model="this.$attrs.value"
           :show-right-icon="showRightIcon"
           :placeholder="`请输入${searchPlaceholder}查询`"
           @on-search="handleSearch"
