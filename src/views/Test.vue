@@ -7,6 +7,7 @@
     <kcs-label prompt="test-debounce" v-debounce="{func: handLabel, event: 'on-prompt-click'}"></kcs-label>
     <kcs-label prompt="test-emit" @on-prompt-click="handPromptClick"></kcs-label>
     <button @click="handleClick3">button</button>
+    <notepad-analysis></notepad-analysis>
   </div>
 </template>
 
@@ -14,9 +15,10 @@
 import KcsLabel from '../components/KcsLabel'
 import KcsSearch from '../components/KcsSearch'
 import { Dialog } from 'vant'
+import NotepadAnalysis from './record/NotepadAnalysis'
 export default {
   name: 'Test',
-  components: { KcsSearch, KcsLabel },
+  components: { NotepadAnalysis, KcsSearch, KcsLabel },
   data () {
     return {
       arg: {

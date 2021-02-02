@@ -1,4 +1,4 @@
-const SystemMenu: any = [
+const SystemMenu = [
   {
     title: '基础数据',
     menus: [
@@ -23,11 +23,12 @@ const SystemMenu: any = [
         url: '/record/notepad',
         icon: 'notes-o',
         perm: 'event-pool-manage'
-      // }, {
-      //   title: '事件记录统计',
-      //   url: '/record/notepad',
-      //   icon: 'notes-o',
-      //   perm: 'type-statistics-manage'
+      },
+      {
+        title: '事件记录统计',
+        url: '/record/notepad/analysis',
+        icon: 'notes-o',
+        perm: 'event-pool-manage'
       }
     ]
   }

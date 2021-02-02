@@ -11,7 +11,7 @@ const common = {
     }
   },
   actions: {
-    SET_NOTEPAD_PARAMS ({commit, state}: { commit: any, state: any }, data: any) {
+    SET_NOTEPAD_PARAMS ({ commit }: { commit: any }, data: any) {
       commit('SET_NOTEPAD_PARAMS', data)
     }
   }

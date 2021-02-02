@@ -9,7 +9,7 @@ const IS_PROD = process.env.NODE_ENV === 'production'
 module.exports = {
   outputDir: `${packageName}`,
   // eslint-loader 是否在保存的时候检查
-  lintOnSave: true,
+  lintOnSave: 'error',
   // 放置生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir 的) 目录。
   // assetsDir: `${packageName}`,
   // 是否使用包含运行时编译器的 Vue 构建版本
@@ -31,8 +31,8 @@ module.exports = {
     },
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8088',
-        // target: 'http://118.178.120.226:8088',
+        // target: 'http://127.0.0.1:8088',
+        target: 'http://118.178.120.226:8088',
         pathRewrite: {
           '^/api': '/' // 删除基本路径
         }

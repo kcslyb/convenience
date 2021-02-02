@@ -50,6 +50,11 @@ const routes = [
     path: '/record/notepad/option',
     name: 'NotepadForm',
     component: () => import('@/views/record/NotepadForm.vue')
+  },
+  {
+    path: '/record/notepad/analysis',
+    name: 'NotepadAnalysis',
+    component: () => import('@/views/record/NotepadAnalysis.vue')
   }
 ]
 const router = new VueRouter({
