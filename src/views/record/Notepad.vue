@@ -2,7 +2,7 @@
   <common-page
     title="记事本"
     :show-search="true"
-    :show-right-icon="true"
+    :show-right-icon="!this.$route.query.type"
     :loading="pageLoading"
     :filters="filterProps"
     v-model="searchData"
@@ -132,16 +132,16 @@ export default {
     queryData () {
       this.pageLoading = true
       const params = this.$store.getters.notepadParams
-      if (params) {
+      if (params && Object.keys(params).length > 0) {
         this.searchData = params
         this.condition = Object.assign({}, this.condition, params)
       }
       DayLogApi.queryPager(this.condition).then(res => {
         this.total = res.data.total
         this.dataList = this.dataList.concat(res.data.list)
-        console.info(res.data.list)
+        console.info(res.data)
         this.finished = this.condition.start * this.condition.size >= this.total
-        this.loading = true
+        this.loading = false
         this.refreshing = false
         this.pageLoading = false
       }).catch(() => {

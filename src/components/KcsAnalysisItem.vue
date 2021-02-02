@@ -43,7 +43,6 @@ export default {
   },
   methods: {
     handleClick (item) {
-      console.info(item)
       this.$emit('on-click', item)
     }
   }

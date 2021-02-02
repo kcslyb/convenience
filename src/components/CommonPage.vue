@@ -11,7 +11,7 @@
       </template>
       <template slot="right">
         <slot name="title-right">
-          <van-icon class="ico-default" size="20" name="bars" @click.stop="handleMore" />
+          <van-icon v-show="showBtnRight" class="ico-default" size="20" name="bars" @click.stop="handleMore" />
         </slot>
       </template>
     </van-nav-bar>
@@ -70,6 +70,10 @@ export default {
     backTip: {
       type: String,
       default: '返回'
+    },
+    showBtnRight: {
+      type: Boolean,
+      default: true
     },
     showSearch: {
       type: Boolean,

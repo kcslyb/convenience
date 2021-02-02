@@ -19,16 +19,17 @@ export const DictApi = Resources('dict', {
 })
 
 export const ConvertApi = Resources('convert', {
-  queryById: (id: string) =>  request.get(`/convert/queryById?id=${id}`)
+  queryById: (id: string) => request.get(`/convert/queryById?id=${id}`)
 })
 
 export const ProductWorkApi = Resources('productWork', {
-  queryById: (id: string) =>  request.get(`/productWork/queryById?id=${id}`)
+  queryById: (id: string) => request.get(`/productWork/queryById?id=${id}`)
 })
 
 export const DayLogApi = Resources('dayLog', {
-  queryById: (id: string) =>  request.get(`/dayLog/queryById?id=${id}`)
+  queryById: (id: string) => request.get(`/dayLog/queryById?id=${id}`),
+  queryCount: (params: any) => request.get('/dayLog/query/count', { params: params })
 })
 export const FileApi = Resources('file', {
-  accessFileBase64: (ids: string) =>  request.post('/file/accessFileBase64', ids)
+  accessFileBase64: (ids: string) => request.post('/file/accessFileBase64', ids)
 })

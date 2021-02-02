@@ -15,16 +15,42 @@ const commonUtil = {
   },
 
   /**
+   * 格式化日期时间函数
+   *
+   * @param formatDate
+   * @returns {String}
+   */
+  formatDateToDateTime: (formatDate) => {
+    if (formatDate) {
+      return moment(formatDate).format('YYYY-MM-DD HH:mm:ss')
+    }
+    return ''
+  },
+
+  /**
    * 格式化日期函数
    *
    * @param formatString
    * @returns {String}
    */
-  formatStringToDate: (formatString) => {
+  formatStringToDateString: (formatString) => {
     if (formatString) {
       return moment(parseInt(formatString)).format('YYYY-MM-DD')
     }
     return ''
+  },
+
+  /**
+   * 格式化日期函数
+   *
+   * @param formatString
+   * @returns {Date}
+   */
+  formatStringToDate: (formatString) => {
+    if (formatString) {
+      return new Date(moment(parseInt(formatString)).format('YYYY-MM-DD'))
+    }
+    return new Date()
   },
 
   timeInterval: (dateStart = +new Date(), dataEnd = +new Date()) => {
@@ -290,6 +316,59 @@ const commonUtil = {
     // eslint-disable-next-line no-return-assign
     resultList.map((val, index) => val.index = index)
     return resultList
+  },
+
+  /**
+   * 获得本月的开端日期
+   * @returns {Date}
+   */
+  getMonthStartDate () {
+    const now = new Date()
+    const nowYear = now.getFullYear()
+    const nowMonth = now.getMonth()
+    const monthStartDate = new Date(nowYear, nowMonth, 1)
+    return new Date(commonUtil.formatDate(monthStartDate) + ' 00: 00: 00')
+  },
+
+  /**
+   * 获得本月的停止日期
+   * @returns {Date}
+   */
+  getMonthEndDate () {
+    const now = new Date()
+    const nowYear = now.getFullYear()
+    const nowMonth = now.getMonth()
+    const monthEndDate = new Date(nowYear, nowMonth, commonUtil.getMonthDays(nowMonth))
+    return new Date(commonUtil.formatDate(monthEndDate) + ' 23: 59: 59')
+  },
+  /**
+   * 格局化日期：yyyy-MM-dd
+   * @param date
+   * @returns {string}
+   */
+  formatDate (date) {
+    const year = date.getFullYear()
+    let month = date.getMonth() + 1
+    let weekday = date.getDate()
+    if (month < 10) {
+      month = '0' + month
+    }
+    if (weekday < 10) {
+      weekday = '0' + weekday
+    }
+    return (year + '-' + month + '-' + weekday)
+  },
+
+  /**
+   * 获得某月的天数
+   * @param myMonth
+   * @returns {number}
+   */
+  getMonthDays (myMonth) {
+    const nowYear = new Date().getFullYear() // 当前年
+    const monthStartDate = new Date(nowYear, myMonth, 1)
+    const monthEndDate = new Date(nowYear, myMonth + 1, 1)
+    return (monthEndDate - monthStartDate) / (1000 * 60 * 60 * 24)
   }
 }
 export default commonUtil

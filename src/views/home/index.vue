@@ -8,15 +8,14 @@
     <div v-show="active === '首页'" class="home-content">
       <div class="home-content-title"></div>
       <div v-for="(item, index) of currentMenus" :key="`system_menu_key_${index}`">
-        <kcs-label :title="item.title"></kcs-label>
+        <kcs-label v-show="item.menus.length > 0" :title="item.title"></kcs-label>
         <van-cell
           class="active"
           v-for="(menu, menu_index) of item.menus"
           :key="`menu_${index}_key_${menu_index}`"
           :title="menu.title"
           :icon="menu.icon"
-          :url="menu.url"
-          is-link />
+          @click="handleMenuClick(menu)"/>
       </div>
     </div>
   </div>
@@ -100,6 +99,11 @@ export default {
       this.$store.dispatch('LogOut').then(() => {
         this.$router.push('/login')
       }).catch((e) => { console.info(e) })
+    },
+    handleMenuClick (menu) {
+      this.$router.push({
+        path: menu.url
+      })
     }
   }
 }

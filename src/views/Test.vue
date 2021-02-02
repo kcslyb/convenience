@@ -1,6 +1,6 @@
 <template>
   <div>
-    <kcs-search show-right-icon></kcs-search>
+    <kcs-search v-model="formData" show-right-icon></kcs-search>
     <h1>java</h1>
     <button v-throttle="handleClick">linux</button>
     <button v-debounce="{func: handleClick2}">linux2</button>
@@ -24,7 +24,8 @@ export default {
       arg: {
         flag: true,
         timeout: 3000
-      }
+      },
+      formData: {}
     }
   },
   methods: {
