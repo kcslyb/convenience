@@ -80,7 +80,15 @@ export default {
     handleClick (item) {
       const endTime = commonUtil.formatDateToDateTime(this.condition.endTime)
       const startTime = commonUtil.formatDateToDateTime(this.condition.startTime)
-      const condition = Object.assign({}, { startTime, endTime, reservedKeyOne: item.reservedKeyOne })
+      const condition = Object.assign({},
+        {
+          endTime: endTime,
+          startTime: startTime,
+          endTimeStamp: +new Date(endTime),
+          startTimeStamp: +new Date(startTime),
+          reservedKeyOne: item.reservedKeyOne,
+          reservedKeyOneLabel: item.reservedKeyTwo
+        })
       this.$store.dispatch('SET_NOTEPAD_PARAMS', condition)
       this.$router.push({
         path: '/record/notepad',

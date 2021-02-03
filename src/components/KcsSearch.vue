@@ -13,7 +13,7 @@
     <van-popup
       v-model="showMore"
       position="right"
-      :style="{height: '100%', width: '100%'}"
+      :style="{height: '100%', width: '80%'}"
       @close="onPopupClose">
       <kcs-search-item
         :filterItems="filters"
@@ -75,7 +75,13 @@ export default {
       this.showMore = false
     },
     handleMoreClose () {
-      this.showMore = false
+      const tempValue = this.$attrs.value
+      if (tempValue || Object.keys(tempValue).length > 0) {
+        Object.keys(tempValue).forEach(value => {
+          this.$set(this.$attrs.value, value, null)
+        })
+      }
+      this.handleMoreConfirm()
     },
     handleMoreConfirm () {
       this.showMore = false

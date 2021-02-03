@@ -15,7 +15,9 @@ import {
   CellGroup,
   RadioGroup,
   CheckboxGroup,
-  DatetimePicker
+  DatetimePicker,
+  TabbarItem,
+  Tabbar
 } from 'vant'
 
 export default {
@@ -35,6 +37,8 @@ export default {
     VanRadioGroup: RadioGroup,
     VanCheckboxGroup: CheckboxGroup,
     VanDatetimePicker: DatetimePicker,
+    VanBarItem: TabbarItem,
+    VanBar: Tabbar,
     KcsFileUpload
   },
   props: {
@@ -294,6 +298,7 @@ export default {
       const options = this.fieldItem.options || this.boxList
       return (
         <van-popup
+          get-container="body"
           position="bottom"
           value={this.showActionSheet}
           onClick-overlay={() => {
@@ -333,6 +338,7 @@ export default {
       }
       return (
         <van-popup
+          get-container="body"
           position="bottom"
           value={this.showActionSheetSelect}
           onClick-overlay={() => {
@@ -398,6 +404,7 @@ export default {
     actionDatetimePicker () {
       return (
         <van-popup
+          get-container="body"
           position="bottom"
           value={this.showDatetimePicker}
           onClick-overlay={() => {
@@ -430,16 +437,7 @@ export default {
     return (
       <div class="search-item-container">
         <div class="search-item-title">
-          <div class="title-left" onClick={() => {
-            this.$emit('cancel-click')
-          }}>
-            <van-icon size="16" name="arrow-left"/>
-            <span class="title-left-back">返回</span>
-          </div>
           <div class="title-label">{this.filterTitle}</div>
-          <div class="title-right" onClick={() => {
-            this.$emit('confirm-click')
-          }}>确定</div>
         </div>
         {
           this.filterItems.map(value => {
@@ -455,6 +453,14 @@ export default {
         {
           this.actionSheet()
         }
+        <van-bar>
+          <van-bar-item name="reset" icon="close" onClick={() => {
+            this.$emit('cancel-click')
+          }}>重置</van-bar-item>
+          <van-bar-item name="confirm" icon="passed" onClick={() => {
+            this.$emit('confirm-click')
+          }}>确定</van-bar-item>
+        </van-bar>
       </div>
     )
   }
@@ -469,7 +475,7 @@ export default {
       color: @common-color;
       background: @common-background-color;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       .title-label {
         font-size: 1rem;

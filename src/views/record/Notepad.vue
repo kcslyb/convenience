@@ -2,7 +2,7 @@
   <common-page
     title="记事本"
     :show-search="true"
-    :show-right-icon="!this.$route.query.type"
+    :show-right-icon="true"
     :loading="pageLoading"
     :filters="filterProps"
     v-model="searchData"
@@ -44,7 +44,7 @@ import { PullRefresh, List, Icon } from 'vant'
 import { DayLogApi, DictApi } from '../../api/resources'
 import Operations from '../../utils/Operations'
 export default {
-  name: 'EntityRelevance',
+  name: 'Notepad',
   components: {
     CommonPage,
     KcsListItem,
@@ -132,7 +132,7 @@ export default {
     queryData () {
       this.pageLoading = true
       const params = this.$store.getters.notepadParams
-      if (params && Object.keys(params).length > 0) {
+      if (params && Object.keys(params).length >= 0) {
         this.searchData = params
         this.condition = Object.assign({}, this.condition, params)
       }
