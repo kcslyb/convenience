@@ -5,37 +5,49 @@
     @touchmove="goTouchMove"
     @touchstart="goTouchStart"
     @click="handleClick">
-    <div class="list-item-title">
-      <div :style="'width:' + (showStatus ? '80%' : '100%')" class="title">{{title}}</div>
-      <div v-show="showStatus" class="status">
+    <div v-show="showLeftStatus" class="left-status">
+      <span
+        class="status-left-icon"
+        :style="'background-color:' + statusIconColor[calcStatus]"
+      ></span>
+      {{ statusName }}
+    </div>
+    <slot name="title">
+      <div class="list-item-title">
+        <div :style="'width:' + (showStatus ? '80%' : '100%')" class="title">{{title}}</div>
+        <div v-show="showStatus" class="status">
         <span
           class="status-icon"
-          :style="'background-color:' + statusIconColor[status]"
+          :style="'background-color:' + statusIconColor[calcStatus]"
         ></span>
-        {{ statusName }}
+          {{ statusName }}
+        </div>
       </div>
-    </div>
+    </slot>
     <div class="nc-list-item">
-      <div class="nc-list-item-container">
+      <div class="nc-list-item-content">
         <div
           :style="'min-width:' + (item.width ? item.width : span) + '%'"
+          v-show="!item.interlock ? true : detailItem[item.prop]"
           class="list-item-detail"
           v-for="(item, index) in detailProps"
           :key="index + item.prop"
         >
-          <div class="label-value" v-if="item.type === 'date'">
+          <div class="label-value label-value-btn" v-if="item.type === 'btn'" @click.stop="handleLabelClick">
             <span class="lv-text-color">{{ item.label }}: </span>
-            {{
-              detailItem[item.prop]
-                ? moment(parseInt(detailItem[item.prop])).format(
-                    item.format ? item.format : "YYYY-MM-DD HH:mm:ss"
-                  )
-                : ""
-            }}
+            {{ detailItem[item.prop] }}
+            {{item.separator || ''}}
+            {{ item.propSecond ? detailItem[item.propSecond] : ''}}
           </div>
-          <div class="label-value" v-else>
+          <div class="label-value" v-else-if="item.type === 'date'">
             <span class="lv-text-color">{{ item.label }}: </span>
-            {{ detailItem[item.prop] }} {{ item.propSecond ? detailItem[item.propSecond] : ''}}
+            {{formatDate(item)}}
+          </div>
+          <div :class="['label-value', item.showLineClamp && 'show-line-clamp' ]" v-else>
+            <span v-if="!item.showLineClamp" class="lv-text-color">{{ item.label }}: </span>
+            {{ detailItem[item.prop] }}
+            {{item.separator || ''}}
+            {{ item.propSecond ? detailItem[item.propSecond] : ''}}
           </div>
         </div>
       </div>
@@ -51,17 +63,13 @@
 
 <script>
 import moment from 'moment'
-import { Checkbox } from 'vant'
 export default {
   name: 'KcsListItem',
-  components: {
-    VanCheckbox: Checkbox
-  },
   props: {
     // 大标题
     title: {
       type: String,
-      default: '大标题'
+      default: ''
     },
     // 右侧状态
     status: {
@@ -107,10 +115,15 @@ export default {
       type: Boolean,
       default: true
     },
+    // 是否显示左状态
+    showLeftStatus: {
+      type: Boolean,
+      default: false
+    },
     // 状态颜色
     statusIconColor: {
       type: Array,
-      default: () => ['#4BD863', '#297FF6', '#297FF6']
+      default: () => ['#0099FF', '#0066FF', '#0033FF', '#0000FF']
     },
     // 单个字段宽的占比
     span: {
@@ -128,11 +141,22 @@ export default {
       timeOutEvent: 0
     }
   },
+  computed: {
+    calcStatus () {
+      if (Object.prototype.toString.call(this.status) === '[object Number]') {
+        return this.status > this.statusIconColor.length ? 0 : this.status
+      } else {
+        return 0
+      }
+    }
+  },
   methods: {
     moment,
     handleClick () {
-      this.$set(this.detailItem, 'checked', !this.detailItem.checked)
       this.$emit('on-click', this.detailItem)
+    },
+    handleLabelClick () {
+      this.$emit('on-label-click', this.detailItem)
     },
     goTouchStart () {
       clearTimeout(this.timeOutEvent)// 清除定时器
@@ -153,81 +177,112 @@ export default {
     goTouchMove () {
       clearTimeout(this.timeOutEvent)// 清除定时器
       this.timeOutEvent = 0
+    },
+    formatDate (item) {
+      return this.detailItem[item.prop]
+        ? moment(+new Date(this.detailItem[item.prop])).format(item.format ? item.format : 'YYYY-MM-DD HH:mm')
+        : ''
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
-  @import "../assets/style/common";
+.list-item {
+  margin: 1rem;
+  padding: 1rem 1.5rem;
+  color: rgb(120 120 120);
+  background-color: white;
+  border-radius: 0.8rem;
 
-  .list-item {
-    padding: .8rem;
-    margin: .8rem .4rem;
-    border-radius: 0.6rem;
-    color: rgb(120 120 120);
-    background-color: white;
+  .left-status {
+    font-size: 1.2rem;
+    padding-bottom: 0.8rem;
 
-    .list-item-title {
-      display: flex;
-      justify-content: space-between;
-
-      .title {
-        text-align: left;
-        font-size: 1rem;
-        line-height: 2rem;
-        font-weight: bolder;
-        padding-right: .7rem;
-        margin-bottom: .425rem;
-        color: @common-color;
-        text-justify: newspaper;
-        word-break: break-all;
-      }
-
-      .status {
-        font-size: .82rem;
-
-        .status-icon {
-          content: " ";
-          display: inline-block;
-          width: 0.4rem;
-          height: 0.4rem;
-          border-radius: 0.3rem;
-          vertical-align: middle;
-          margin-top: -0.15rem;
-          margin-right: 0.5rem;
-        }
-      }
-    }
-
-    .nc-list-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      .nc-list-item-container {
-        width: 100%;
-      }
-
-      .nc-list-item-checkbox {
-        padding-right: 1.5rem;
-      }
-    }
-
-    .list-item-detail {
-      width: auto;
-      text-align: left;
+    .status-left-icon {
+      content: " ";
       display: inline-block;
-      font-size: .8rem;
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 0.3rem;
+      vertical-align: middle;
+      margin-top: -0.15rem;
+      margin-right: 0.5rem;
+    }
+  }
 
-      .label-value {
-        padding: 0.3rem 0;
-        color: @common-color;
+  .list-item-title {
+    display: flex;
+    justify-content: space-between;
 
-        .lv-text-color {
-          color: @common-second-color;
-        }
+    .title {
+      text-align: left;
+      font-size: 1.4rem;
+      line-height: 2.4rem;
+      font-weight: bolder;
+      padding-right: 1.25rem;
+      margin-bottom: .625rem;
+      color: #1C2836;
+      text-justify: newspaper;
+      word-break: break-all;
+      display: -webkit-box; /** 对象作为伸缩盒子模型显示 **/
+      -webkit-box-orient: vertical; /** 设置或检索伸缩盒对象的子元素的排列方式 **/
+      -webkit-line-clamp: 2; /** 显示的行数 **/
+      overflow: hidden; /** 隐藏超出的内容 **/
+    }
+
+    .status {
+      font-size: 1.2rem;
+      width: 100px;
+      text-align: right;
+      .status-icon {
+        content: " ";
+        display: inline-block;
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 0.3rem;
+        vertical-align: middle;
+        margin-top: -0.15rem;
+        margin-right: 0.5rem;
       }
     }
   }
+  .nc-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .nc-list-item-content {
+      width: 100%;
+    }
+    .nc-list-item-checkbox {
+      padding-right: .5rem;
+    }
+  }
+
+  .list-item-detail {
+    width: auto;
+    display: inline-block;
+
+    .show-line-clamp {
+      text-overflow: ellipsis;
+      display: -webkit-box; /** 对象作为伸缩盒子模型显示 **/
+      -webkit-box-orient: vertical; /** 设置或检索伸缩盒对象的子元素的排列方式 **/
+      -webkit-line-clamp: 2; /** 显示的行数 **/
+      overflow: hidden; /** 隐藏超出的内容 **/
+    }
+    .label-value {
+      padding: 0.3rem 0;
+      font-size: 1.2rem;
+      color: #252525;
+      word-break: break-all;
+      .lv-text-color {
+        display: inline-block;
+        color: #6e7d93;
+      }
+    }
+    .label-value-btn {
+      color: #0079fe;
+    }
+  }
+}
 </style>

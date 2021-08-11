@@ -1,24 +1,10 @@
 <script>
 import moment from 'moment'
-import KcsFileUpload from '@/components/KcsFileUpload'
-import { Form, Field, Cell, RadioGroup, Radio, CheckboxGroup, Checkbox, Icon, Popup, Picker, DatetimePicker, Stepper } from 'vant'
+import KcsFieldUpload from './KcsFileUpload'
+import Vue from 'vue'
 export default {
   name: 'KcsFieldList',
-  components: {
-    VanForm: Form,
-    VanCell: Cell,
-    VanIcon: Icon,
-    VanField: Field,
-    VanPopup: Popup,
-    VanRadio: Radio,
-    VanPicker: Picker,
-    VanCheckbox: Checkbox,
-    VanRadioGroup: RadioGroup,
-    VanCheckboxGroup: CheckboxGroup,
-    VanDatetimePicker: DatetimePicker,
-    VanStepper: Stepper,
-    KcsFileUpload
-  },
+  components: { KcsFieldUpload },
   props: {
     // field行参数数组 eg: [{name: 'prop', label: '参数名'}...]
     fieldProps: {
@@ -49,10 +35,7 @@ export default {
       showActionSheetSelect: false,
       tempCheckedList: '',
       boxList: [
-        {
-          value: '132456',
-          label: '选项一'
-        }
+        { value: '132456', label: '测试选项一' }, { value: '1', label: '测试选项二' }, { value: '1', label: '测试选项三' }
       ]
     }
   },
@@ -65,15 +48,9 @@ export default {
   },
   methods: {
     generate (item) {
-      if (item.type) {
-        const reg = /\b(\w)|\s(\w)/g
-        const type = item.type.replace(reg, (m) => {
-          return m.toUpperCase()
-        })
-        return this[`generate${type}`](item)
-      } else {
-        return this.generateField(item)
-      }
+      const temp = item.type || 'field'
+      const type = temp.replace(/\b(\w)/, m => m.toUpperCase())
+      return this[`generate${type}`](item)
     },
     // 生成输入框 type: field 默认返回该组件
     generateField (item) {
@@ -92,7 +69,7 @@ export default {
           required={item.required}
           error-message-align="right"
           label-class="label-class"
-          style="font-size: 1rem"
+          style="font-size: 1.4rem"
           rows={item.rows ? item.rows : 1}
           placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请输入${item.label}`)}
           value={this.$attrs.value[item.name]}
@@ -112,7 +89,7 @@ export default {
         <van-cell
           value={this.$attrs.value[item.name]}
           title={item.label + ':'}
-          style="font-size: 1rem"
+          style="font-size: 1.4rem"
         />
       )
     },
@@ -120,12 +97,7 @@ export default {
     generateRadio (item) {
       if (item.option && item.option.length > 0) {
         return (
-          <div class="nc-radio-container">
-            <div class={{
-              'label-class': true,
-              'textarea-label': true,
-              'van-cell--required': item.required
-            }}>{item.label + ':'}</div>
+          <van-field>
             <van-radio-group
               class="nc-radio"
               disabled={item.readonly}
@@ -152,15 +124,12 @@ export default {
                 })
               }
             </van-radio-group>
-          </div>
+          </van-field>
         )
       } else {
         return (
           <div class="nc-radio-container">
-            <div class={{
-              'label-class': true,
-              'van-cell--required': item.required
-            }}>
+            <div class={{ 'label-class': true, 'van-cell--required': item.required }}>
               {item.label + ':'}</div>
             <van-radio-group
               class="nc-radio"
@@ -171,14 +140,12 @@ export default {
                 if (!item.readonly) {
                   this.$set(this.$attrs.value, item.name, '1')
                 }
-              }}>合格
-              </van-radio>
+              }}>合格</van-radio>
               <van-radio icon-size="1.6rem" name="0" class="label-class" onClick={() => {
                 if (!item.readonly) {
                   this.$set(this.$attrs.value, item.name, '0')
                 }
-              }}>不合格
-              </van-radio>
+              }}>不合格</van-radio>
             </van-radio-group>
           </div>
         )
@@ -188,10 +155,7 @@ export default {
     generateCheckbox (item) {
       if (!item.option || item.option.length === 0) {
         item.option = [
-          {
-            value: '1',
-            label: ''
-          }
+          { value: '1', label: '' }
         ]
       }
       return (
@@ -245,7 +209,7 @@ export default {
             label-width={item.labelWidth ? item.labelWidth : 'auto'}
             class="field-textarea"
             label-class="label-class"
-            style="font-size: 1rem"
+            style="font-size: 1.4rem"
             rows={item.rows ? item.rows : 2}
             placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请输入${item.label}`)}
             value={this.$attrs.value[item.name]}
@@ -257,7 +221,17 @@ export default {
         </div>
       )
     },
-    // 生成输入框 type: select
+    // 根据code获得label
+    conversionLabel (item) {
+      const value = this.$attrs.value[item.name] || ''
+      const label = this.$attrs.value[item.nameLabel] || ''
+      if (!label && value) {
+        const temp = item.options.filter(option => option[item.optionProps.value] === value)
+        return temp.length > 0 ? temp[0][item.optionProps.label] : ''
+      }
+      return label
+    },
+    // 生成单选选面版 type: select
     generateSelect (item) {
       return (
         <van-field
@@ -276,9 +250,9 @@ export default {
           type={item.fieldType}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 1rem"
+          style="font-size: 1.4rem"
           placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
-          attrs={{ value: this.$attrs.value[item.nameLabel] }}
+          attrs={{ value: this.conversionLabel(item) }}
           validate-trigger="onChange"
           show-word-limit={item.showWordLimit}
           maxlength={item.maxlength ? item.maxlength : 100}
@@ -320,7 +294,7 @@ export default {
             type={item.fieldType}
             label={item.label + ':'}
             label-class="label-class"
-            style="font-size: 1rem"
+            style="font-size: 1.4rem"
             placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
             attrs={{ value: this.$attrs.value[item.nameLabel] }}
             validate-trigger="onChange"
@@ -336,7 +310,7 @@ export default {
               }
             }}
           />
-          {this.multipleTmp(item, this.$attrs.value[item.name], this.$attrs.value[item.nameLabel])}
+          { this.multipleTmp(item, this.$attrs.value[item.name], this.$attrs.value[item.nameLabel]) }
         </div>
       )
     },
@@ -369,24 +343,24 @@ export default {
                 return <div class="participant-item">
                   <span>{name}</span>
                   {!item.readonly &&
-                    <van-icon
-                      name="clear"
-                      class="participant-item-i"
-                      onClick={() => {
-                        names.splice(index, 1)
-                        const labelTemps = item.options.filter(value => names.includes(value[item.optionProps.label]))
-                        const ids = []
-                        labelTemps.forEach(value => {
-                          ids.push(value[item.optionProps.value])
-                        })
-                        this.$set(this.$attrs.value, item.name, ids.join(','))
-                        this.$set(this.$attrs.value, item.nameLabel, names.join(','))
-                        this.tempCheckedList = this.$attrs.value[item.name] || ''
-                        // 点击事件回调 item.event 为事件名, 前提是设置isCallback为true,默认事件名为on-{item.ame}
-                        const eventName = !item.event ? `on-${item.name}` : item.event
-                        this.$emit(eventName, item)
-                      }}
-                    />}
+                  <van-icon
+                    name="clear"
+                    class="participant-item-i"
+                    onClick={() => {
+                      names.splice(index, 1)
+                      const labelTemps = item.options.filter(value => names.includes(value[item.optionProps.label]))
+                      const ids = []
+                      labelTemps.forEach(value => {
+                        ids.push(value[item.optionProps.value])
+                      })
+                      this.$set(this.$attrs.value, item.name, ids.join(','))
+                      this.$set(this.$attrs.value, item.nameLabel, names.join(','))
+                      this.tempCheckedList = this.$attrs.value[item.name] || ''
+                      // 点击事件回调 item.event 为事件名, 前提是设置isCallback为true,默认事件名为on-{item.ame}
+                      const eventName = !item.event ? `on-${item.name}` : item.event
+                      this.$emit(eventName, item)
+                    }}
+                  />}
                 </div>
               })}
             </div>
@@ -413,7 +387,7 @@ export default {
           type={item.fieldType}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 1rem"
+          style="font-size: 1.4rem"
           placeholder={item.readonly ? '' : (item.placeholder ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
           validate-trigger="onChange"
@@ -437,32 +411,31 @@ export default {
       const multipleTmpList = v ? v.split(',') : []
       const multipleTmp = () => {
         return (<div class="multiple-tmp">
-          {multipleTmpList.map(t => {
+          { multipleTmpList.map(t => {
             return <div class="participant-item">
               <span>{t}</span>
               {!item.readonlyFixed && !item.readonly &&
-                <van-icon
-                  class="participant-item-i"
-                  name="clear"
-                  onClick={() => {
-                    const ids = this.$attrs.value[item.name]
-                    const idList = ids ? ids.split(',') : []
-                    const labels = []
-                    const names = []
-                    for (let i = 0; i < multipleTmpList.length; i++) {
-                      if (multipleTmpList[i] !== t) {
-                        labels.push(multipleTmpList[i])
-                        names.push(idList[i])
-                      }
+              <van-icon
+                class="participant-item-i"
+                name="clear"
+                onClick={() => {
+                  const ids = this.$attrs.value[item.name]
+                  const idList = ids ? ids.split(',') : []
+                  const labels = []; const names = []
+                  for (let i = 0; i < multipleTmpList.length; i++) {
+                    if (multipleTmpList[i] !== t) {
+                      labels.push(multipleTmpList[i])
+                      names.push(idList[i])
                     }
-                    this.$set(this.$attrs.value, item.nameLabel, labels.join(','))
-                    this.$set(this.$attrs.value, item.name, names.join(','))
-                    // 点击事件回调 item.changeEvent 为事件名, 默认事件名为on-change-{item.ame}
-                    const eventName = item.changeEvent ? item.changeEvent : `on-change-${item.name}`
-                    this.$emit(eventName, item)
-                    this.$forceUpdate()
-                  }}
-                />}
+                  }
+                  this.$set(this.$attrs.value, item.nameLabel, labels.join(','))
+                  this.$set(this.$attrs.value, item.name, names.join(','))
+                  // 点击事件回调 item.changeEvent 为事件名, 默认事件名为on-change-{item.ame}
+                  const eventName = item.changeEvent ? item.changeEvent : `on-change-${item.name}`
+                  this.$emit(eventName, item)
+                  this.$forceUpdate()
+                }}
+              />}
             </div>
           })}
         </div>)
@@ -485,7 +458,7 @@ export default {
             type={item.fieldType}
             label={item.label + ':'}
             label-class="label-class"
-            style="font-size: 1rem"
+            style="font-size: 1.4rem"
             placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
             attrs={{ value: this.$attrs.value[item.nameLabel] }}
             validate-trigger="onChange"
@@ -509,11 +482,12 @@ export default {
     // 生成输入框 type: date
     generateDate (item) {
       if (item.name) {
-        let format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
+        let format = item.format ? item.format : 'YYYY-MM-DD HH:mm:ss'
         if (this.$attrs.value[item.name]) {
           let temp = ''
-          const reg = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
-          if (reg.test(this.$attrs.value[item.name])) {
+          const flag = item.format === 'YYYY-MM-DD HH:mm:ss'
+          const reg = /[\d]{4}-[\d]{2}-[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}/
+          if (reg.test(this.$attrs.value[item.name]) && flag) {
             temp = this.$attrs.value[item.name]
           } else {
             format = format.replace(/-/g, '/')
@@ -536,7 +510,7 @@ export default {
           label-width={item.labelWidth ? item.labelWidth : 'auto'}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 1rem"
+          style="font-size: 1.4rem"
           placeholder={item.readonly ? '' : (item.readonlyFixed ? item.placeholder : `请选择${item.label}`)}
           attrs={{ value: this.$attrs.value[item.nameLabel] }}
           input-align={item.inputAlign ? item.inputAlign : 'right'}
@@ -554,10 +528,7 @@ export default {
     // 生成输入框 type: flag
     generateFlag (item) {
       if (item.name) {
-        const tempObj = item.flagObj ? item.flagObj : {
-          0: '否',
-          1: '是'
-        }
+        const tempObj = item.flagObj ? item.flagObj : { 0: '否', 1: '是' }
         if (this.$attrs.value[item.name]) {
           const temp = tempObj[this.$attrs.value[item.name]]
           this.$set(this.$attrs.value, item.nameLabel, temp)
@@ -575,7 +546,7 @@ export default {
           label-width={item.labelWidth ? item.labelWidth : 'auto'}
           label={item.label + ':'}
           label-class="label-class"
-          style="font-size: 1rem"
+          style="font-size: 1.4rem"
           placeholder={item.readonly ? '' : '点击选择'}
           value={this.$attrs.value[item.nameLabel]}
           input-align={item.inputAlign ? item.inputAlign : 'right'}
@@ -589,9 +560,13 @@ export default {
         temp = temp.split(',')
       }
       return (
-        <kcs-file-upload
+        <kcs-field-upload
           file-ids={temp}
+          accept={item.accept}
+          label={item.label}
           show-info={item.readonly}
+          file-format={item.fileFormat}
+          is-check-format={item.isCheckFormat}
           onOn-file-change={(fileList) => {
             this.$emit('onFileChange', item, fileList)
           }}/>
@@ -656,16 +631,19 @@ export default {
               this.$set(this.$attrs.value, this.fieldItem.name, +new Date(item))
               let format = this.fieldItem.format ? this.fieldItem.format : 'YYYY-MM-DD HH:mm:ss'
               format = format.replace(/-/g, '/')
-              const seconds = new Date().getSeconds()
               const temp = moment(new Date(item)).format(format)
-              const result = temp.substring(0, temp.length - 2) + seconds
+              let result = temp
+              if (/[\d]{4}-[\d]{2}-[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}/.test(format)) {
+                const seconds = new Date().getSeconds()
+                result = temp.substring(0, temp.length - 2) + seconds
+              }
               this.$set(this.$attrs.value, this.fieldItem.nameLabel, result.replace(/\//, '-'))
               this.$set(this.$attrs.value, this.fieldItem.name, +new Date(result))
               // 点击事件回调 item.event 为事件名, 前提是设置isCallback为true,默认事件名为on-{item.ame}
               const eventName = !this.fieldItem.event ? `on-${this.fieldItem.name}` : this.fieldItem.event
               this.$emit(eventName, new Date(result), this.fieldItem)
               this.showDatetimePicker = false
-            }}/>
+            }} />
         </van-popup>
       )
     },
@@ -695,8 +673,7 @@ export default {
               <button type="button" class="van-picker__cancel" onClick={() => {
                 this.tempCheckedList = ''
                 this.showActionSheetSelect = false
-              }}>取消
-              </button>
+              }}>取消</button>
               <button type="button" class="van-picker__confirm" onClick={() => {
                 const temp = this.tempCheckedList.split(',')
                 this.$set(this.$attrs.value, this.fieldItem.name, this.tempCheckedList)
@@ -712,8 +689,7 @@ export default {
                 const eventName = !this.fieldItem.event ? `on-${this.fieldItem.name}` : this.fieldItem.event
                 this.$emit(eventName, this.fieldItem)
                 this.showActionSheetSelect = false
-              }}>确认
-              </button>
+              }}>确认</button>
             </div>
           </van-sticky>
           <van-checkbox-group
@@ -738,7 +714,7 @@ export default {
                             return (
                               <van-checkbox
                                 name={value[optionProps.value]}
-                                ref={'check' + this.fieldItem.name + index}/>
+                                ref={'check' + this.fieldItem.name + index} />
                             )
                           }
                         }
@@ -756,7 +732,7 @@ export default {
     return (
       <van-form
         show-error-message={this.showErrorMessage}
-        ref="KcsFieldForm"
+        ref="ncFieldForm"
         onFailed={(errorInfo) => {
           const temp = [].concat(errorInfo.errors)
           const errorMsg = []
@@ -773,112 +749,132 @@ export default {
         }}>
         {
           this.fieldProps.map(item => {
-            return this.generate(item)
+            return (
+              <field-item self={this} prop-item={item}/>
+            )
           })
         }
-        {this.actionSheet()}
-        {this.actionSheetSelect()}
-        {this.actionDatetimePicker()}
+        <action-sheet self={this} method="actionSheet"/>
+        <action-sheet self={this} method="actionSheetSelect"/>
+        <action-sheet self={this} method="actionDatetimePicker"/>
       </van-form>
     )
   }
 }
+Vue.component('action-sheet', {
+  props: {
+    self: {
+      type: Object,
+      required: true
+    },
+    method: {
+      type: String,
+      required: true
+    }
+  },
+  render (createElement) {
+    return createElement('div', {}, [this.self[this.method]()])
+  }
+})
+Vue.component('field-item', {
+  props: {
+    propItem: {
+      type: Object,
+      required: true
+    },
+    self: {
+      type: Object,
+      required: true
+    }
+  },
+  render (createElement) {
+    return createElement('div', {}, [this.self.generate(this.propItem)])
+  }
+})
 </script>
 
 <style lang="less" scoped>
-  .label-class {
-    color: #6E7D93;
-    font-size: 1rem;
+.label-class {
+  color: #6E7D93;
+  font-size: 1.4rem;
+}
+.textarea-label {
+  background-color: white;
+  padding-left: 16px;
+  padding-top: 10px;
+}
+.field-textarea {
+  /deep/.van-field__body {
+    background: #ffffff;
+    padding: 1rem;
+    border: .1rem solid #ebedf0;
+    border-radius: .3rem;
   }
-
+}
+.nc-textarea {
+  border-bottom: .03rem solid #ebedf0;
+}
+.nc-radio-container{
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.6rem;
+  background-color: white;
+  justify-content: space-between;
+  border-bottom: .03rem solid #ebedf0;
   .textarea-label {
     background-color: white;
-    padding-left: 16px;
+    padding-left: 0px;
     padding-top: 10px;
-    text-align: left;
   }
-
-  .field-textarea {
-    /deep/ .van-field__body {
-      background: #ffffff;
-      padding: 1rem;
-      border: .1rem solid #ebedf0;
-      border-radius: .3rem;
+  .nc-radio {
+    font-size: 1.4rem;
+    line-height: 2.4rem;
+    .nc-radio-label {
+      color: #6E7D93;
+      font-size: 1.4rem;
     }
   }
+}
+.van-cell--required::before {
+  position: absolute;
+  left: 8px;
+  color: #ee0a24;
+  font-size: 14px;
+  content: '*';
+}
+.multiple-select {
+  background-color: #fff;
+  border-bottom: .03rem solid #ebedf0;
 
-  .nc-textarea {
-    border-bottom: .0625rem solid #ebedf0;
-  }
-
-  .nc-radio-container {
+  .multiple-tmp {
     display: flex;
-    align-items: center;
-    padding: 0.625rem 1rem;
-    background-color: white;
-    justify-content: space-between;
-    border-bottom: .0625rem solid #ebedf0;
-
-    .textarea-label {
-      background-color: white;
-      padding-left: 0;
-      padding-top: 0.625rem;
-    }
-
-    .nc-radio {
-      font-size: 1rem;
-      line-height: 2.4rem;
-
-      .nc-radio-label {
-        color: #6E7D93;
-        font-size: 1rem;
-      }
-    }
-  }
-
-  .van-cell--required::before {
-    position: absolute;
-    left: 8px;
-    color: #ee0a24;
-    font-size: 1rem;
-    content: '*';
-  }
-
-  .multiple-select {
+    flex-wrap: wrap;
     background-color: #fff;
-    border-bottom: .03rem solid #ebedf0;
+    padding: 0.6rem 0;
 
-    .multiple-tmp {
-      display: flex;
-      flex-wrap: wrap;
-      background-color: #fff;
-      padding: 0.6rem 0;
+    .participant-item {
+      padding: 0.4rem 2rem;
+      margin: 0.2rem 1rem;
+      box-sizing: border-box;
+      background-color: #e1e9ff;
+      color: #666666;
+      position: relative;
+      font-size: 1.2rem;
 
-      .participant-item {
-        padding: 0.4rem 2rem;
-        margin: 0.2rem 1rem;
-        box-sizing: border-box;
-        background-color: #e1e9ff;
-        color: #666666;
-        position: relative;
-        font-size: 1rem;
-
-        .participant-item-i {
-          position: absolute;
-          right: .28rem;
-          top: .28rem;
-          color: #5289ff;
-        }
+      .participant-item-i {
+        position: absolute;
+        right: -4px;
+        top: -4px;
+        color: #5289ff;
       }
     }
   }
-
-  .pointer-events-none {
-    pointer-events: none;
-  }
-
-  /deep/ .van-cell::after {
-    left: 0;
-    right: 0;
-  }
+}
+.pointer-events-none {
+  pointer-events: none;
+}
+/deep/ .van-cell::after {
+  left: 0;
+  right: 0;
+}
 </style>
